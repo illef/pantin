@@ -12,6 +12,41 @@ pub struct BufferMutView<'a> {
     offset: Point,
 }
 
+impl BufferMutView<'_> {
+    fn size(&self) -> Size {
+        self.size
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> impl Iterator<Item = PointWithMutCell<'a>> + '_ {
+        let offset = self.offset;
+        let size = self.size;
+        self.buffer.iter_mut().filter(move |point_with_cell| {
+            point_with_cell.p.x >= offset.x
+                && point_with_cell.p.x < (offset.x + size.width)
+                && point_with_cell.p.y >= offset.y
+                && point_with_cell.p.y < (offset.y + size.height)
+        })
+    }
+
+    pub fn write_cells(&mut self, mut cells: impl Iterator<Item = Cell>) {
+        let mut dest = self.iter_mut();
+
+        use unicode_width::UnicodeWidthChar;
+
+        while let Some(point_with_cell) = dest.next() {
+            if let Some(cell) = cells.next() {
+                let width = cell.ch.width().unwrap() as u16;
+                *point_with_cell.cell = Some(cell);
+                for _ in 0..width {
+                    let _ = dest.next();
+                }
+            } else {
+                break;
+            }
+        }
+    }
+}
+
 impl Buffer {
     pub fn new(size: Size) -> Buffer {
         Buffer {

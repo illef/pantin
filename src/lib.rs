@@ -6,6 +6,7 @@ pub mod utils;
 pub mod view;
 
 use color::*;
+pub use view::View;
 
 #[derive(Clone, PartialEq, Copy)]
 pub struct Cell {

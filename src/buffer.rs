@@ -13,7 +13,7 @@ pub struct BufferMutView<'a> {
 }
 
 impl BufferMutView<'_> {
-    fn size(&self) -> Size {
+    pub fn size(&self) -> Size {
         self.size
     }
 
@@ -37,7 +37,7 @@ impl BufferMutView<'_> {
             if let Some(cell) = cells.next() {
                 let width = cell.ch.width().unwrap() as u16;
                 *point_with_cell.cell = Some(cell);
-                for _ in 0..width {
+                for _ in 1..width {
                     let _ = dest.next();
                 }
             } else {
@@ -94,6 +94,6 @@ impl Buffer {
         Ok(())
     }
     pub fn size(&self) -> Size {
-        self.size.clone()
+        self.size
     }
 }

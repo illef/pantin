@@ -88,12 +88,12 @@ impl Buffer {
         })
     }
 
-    fn write(&mut self, p: Point, c: Cell) -> Result<(), BoxError> {
+    pub fn write(&mut self, p: Point, c: Cell) -> Result<(), BoxError> {
         //TODO size check
         self.buffer[p.y as usize * self.size.width as usize + p.x as usize] = Some(c);
         Ok(())
     }
-    fn size(&self) -> Size {
+    pub fn size(&self) -> Size {
         self.size.clone()
     }
 }

@@ -12,6 +12,7 @@ pub trait View {
     fn render(&mut self, buf: &mut BufferMutView);
 }
 
+#[derive(Copy, PartialEq, Clone)]
 pub enum Alignment {
     Left,
     Right,

@@ -11,7 +11,7 @@ use pantin::*;
 
 fn main() {
     let screen = AlternateScreen::from(stdout().into_raw_mode().unwrap());
-    let mut screen = termion::cursor::HideCursor::from(screen);
+    let screen = termion::cursor::HideCursor::from(screen);
     let mut keys = async_stdin().keys();
     let mut termion = backend::Termion::new(screen);
 
@@ -28,16 +28,17 @@ fn main() {
         }
 
         let size = termion.size();
-        let mut buffer_mut_view = termion.get_buffer().as_mut_view(
-            Point {
-                x: 0,
-                y: size.height - 1,
-            },
+        let mut termion_buffer_view = termion.get_buffer_view();
+        let mut buffer_mut_view = termion_buffer_view.as_mut_view(
+            Point(0, size.height - 1),
             Size {
                 width: size.width,
                 height: 1,
             },
         );
+
+        assert_eq!(buffer_mut_view.size().width, size.width);
+        assert_eq!(buffer_mut_view.size().height, 1);
 
         line_view.render(&mut buffer_mut_view);
 

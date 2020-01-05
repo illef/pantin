@@ -17,15 +17,58 @@ impl BufferMutView<'_> {
         self.size
     }
 
+    fn inner_buffer_iter_mut<'a>(&'a mut self) -> impl Iterator<Item = PointWithMutCell<'a>> + '_ {
+        let size = self.buffer.size();
+        self.buffer
+            .buffer
+            .iter_mut()
+            .enumerate()
+            .map(move |(i, cell)| {
+                let p = index_into_point(i, size);
+                PointWithMutCell { p, cell }
+            })
+    }
+
+    pub fn as_mut_view<'a>(&'a mut self, offset: Point, size: Size) -> BufferMutView<'a> {
+        BufferMutView {
+            buffer: self.buffer,
+            offset: self.offset.add(offset),
+            size,
+        }
+    }
+
     pub fn iter_mut<'a>(&'a mut self) -> impl Iterator<Item = PointWithMutCell<'a>> + '_ {
         let offset = self.offset;
         let size = self.size;
-        self.buffer.iter_mut().filter(move |point_with_cell| {
-            point_with_cell.p.x >= offset.x
-                && point_with_cell.p.x < (offset.x + size.width)
-                && point_with_cell.p.y >= offset.y
-                && point_with_cell.p.y < (offset.y + size.height)
-        })
+        self.inner_buffer_iter_mut()
+            .filter(move |point_with_cell| {
+                point_with_cell.p.0 >= offset.0
+                    && point_with_cell.p.0 < (offset.0 + size.width)
+                    && point_with_cell.p.1 >= offset.1
+                    && point_with_cell.p.1 < (offset.1 + size.height)
+            })
+            .map(move |mut point_with_cell| {
+                point_with_cell.p.sub(offset);
+                point_with_cell
+            })
+    }
+
+    pub fn get_mut_cell(&mut self, p: Point) -> Option<&mut Option<Cell>> {
+        let p = p.add(self.offset);
+        let size = self.buffer.size();
+        if p.is_in(size) {
+            Some(&mut self.buffer.buffer[p.into_index(size)])
+        } else {
+            None
+        }
+    }
+
+    pub fn write_buffer(&mut self, buffer: &Buffer) {
+        buffer.iter().for_each(|point_with_cell| {
+            if let Some(dest_cell) = self.get_mut_cell(point_with_cell.p) {
+                *dest_cell = *point_with_cell.cell
+            }
+        });
     }
 
     pub fn write_cells(&mut self, mut cells: impl Iterator<Item = Cell>) {
@@ -38,7 +81,9 @@ impl BufferMutView<'_> {
                 let width = cell.ch.width().unwrap() as u16;
                 *point_with_cell.cell = Some(cell);
                 for _ in 1..width {
-                    let _ = dest.next();
+                    if let Some(blank_cell) = dest.next() {
+                        *blank_cell.cell = None;
+                    }
                 }
             } else {
                 break;
@@ -63,36 +108,27 @@ impl Buffer {
         }
     }
 
+    pub fn get_cell(&mut self, p: Point) -> Option<&Option<Cell>> {
+        if p.is_in(self.size()) {
+            Some(&self.buffer[p.into_index(self.size())])
+        } else {
+            None
+        }
+    }
+
     pub fn iter<'a>(&'a self) -> impl Iterator<Item = PointWithCell<'a>> + '_ {
-        let width = self.size.width;
+        let size = self.size;
         self.buffer.iter().enumerate().map(move |(i, cell)| {
-            let p = Point {
-                y: i as u16 / width,
-                x: i as u16 % width,
-            };
-            PointWithCell {
-                p,
-                cell: cell.as_ref(),
-            }
+            let p = index_into_point(i, size);
+            PointWithCell { p, cell }
         })
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> impl Iterator<Item = PointWithMutCell<'a>> + '_ {
-        let width = self.size.width;
-        self.buffer.iter_mut().enumerate().map(move |(i, cell)| {
-            let p = Point {
-                y: i as u16 / width,
-                x: i as u16 % width,
-            };
-            PointWithMutCell { p, cell }
-        })
-    }
-
-    pub fn write(&mut self, p: Point, c: Cell) -> Result<(), BoxError> {
-        //TODO size check
-        self.buffer[p.y as usize * self.size.width as usize + p.x as usize] = Some(c);
-        Ok(())
-    }
+    //pub fn write(&mut self, p: Point, c: Cell) -> Result<(), BoxError> {
+    ////TODO size check
+    //self.buffer[p.y as usize * self.size.width as usize + p.x as usize] = Some(c);
+    //Ok(())
+    //}
     pub fn size(&self) -> Size {
         self.size
     }

@@ -6,6 +6,7 @@ pub mod utils;
 pub mod view;
 
 use color::*;
+use termion::cursor;
 pub use view::View;
 
 #[derive(Clone, PartialEq, Copy)]
@@ -15,10 +16,32 @@ pub struct Cell {
     pub bg: Color,
 }
 
-#[derive(Clone, PartialEq, Copy)]
-pub struct Point {
-    pub x: u16,
-    pub y: u16,
+#[derive(Clone, PartialEq, Copy, Debug)]
+pub struct Point(pub u16, pub u16);
+
+impl Point {
+    pub fn is_in(&self, size: Size) -> bool {
+        self.0 < size.width && self.1 < size.height
+    }
+    pub fn add(&self, p: Point) -> Point {
+        Point(self.0 + p.0, self.1 + p.1)
+    }
+
+    pub fn sub(&self, p: Point) -> Point {
+        Point(self.0 - p.0, self.1 - p.1)
+    }
+
+    pub fn into_index(&self, size: Size) -> usize {
+        (self.0 as usize) + (self.1 as usize * size.width as usize)
+    }
+
+    pub fn into_goto(&self) -> cursor::Goto {
+        cursor::Goto(self.0 + 1, self.1 + 1)
+    }
+}
+
+pub fn index_into_point(i: usize, size: Size) -> Point {
+    Point(i as u16 % size.width, i as u16 / size.width)
 }
 
 #[derive(Clone, PartialEq, Copy)]
@@ -29,7 +52,7 @@ pub struct Size {
 
 pub struct PointWithCell<'a> {
     pub p: Point,
-    pub cell: Option<&'a Cell>,
+    pub cell: &'a Option<Cell>,
 }
 
 pub struct PointWithMutCell<'a> {

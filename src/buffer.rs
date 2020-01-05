@@ -48,7 +48,7 @@ impl BufferMutView<'_> {
                     && point_with_cell.p.1 < (offset.1 + size.height)
             })
             .map(move |mut point_with_cell| {
-                point_with_cell.p.sub(offset);
+                point_with_cell.p = point_with_cell.p.sub(offset);
                 point_with_cell
             })
     }

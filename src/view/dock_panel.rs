@@ -27,11 +27,26 @@ impl DockPanel {
         self
     }
 
+    fn available_width(available_size: Size, desire_size: Size) -> u16 {
+        if available_size.width < desire_size.width {
+            available_size.width
+        } else {
+            desire_size.width
+        }
+    }
+
+    fn available_height(available_size: Size, desire_size: Size) -> u16 {
+        if available_size.height < desire_size.height {
+            available_size.height
+        } else {
+            desire_size.height
+        }
+    }
     fn render_right(
         mut buffer_mut_view: BufferMutView,
         child_view: &mut Box<dyn View>,
     ) -> (Point, Size) {
-        let width = child_view.desire_size().width;
+        let width = Self::available_width(buffer_mut_view.size(), child_view.desire_size());
 
         let mut child_mut_view = buffer_mut_view.as_mut_view(
             Point(buffer_mut_view.size().width - width, 0),
@@ -54,7 +69,7 @@ impl DockPanel {
         mut buffer_mut_view: BufferMutView,
         child_view: &mut Box<dyn View>,
     ) -> (Point, Size) {
-        let width = child_view.desire_size().width;
+        let width = Self::available_width(buffer_mut_view.size(), child_view.desire_size());
 
         let mut child_mut_view = buffer_mut_view.as_mut_view(
             Point(0, 0),
@@ -77,7 +92,7 @@ impl DockPanel {
         mut buffer_mut_view: BufferMutView,
         child_view: &mut Box<dyn View>,
     ) -> (Point, Size) {
-        let height = child_view.desire_size().height;
+        let height = Self::available_height(buffer_mut_view.size(), child_view.desire_size());
         let mut child_mut_view = buffer_mut_view.as_mut_view(
             Point(0, buffer_mut_view.size().height - height),
             Size {
@@ -97,7 +112,7 @@ impl DockPanel {
         mut buffer_mut_view: BufferMutView,
         child_view: &mut Box<dyn View>,
     ) -> (Point, Size) {
-        let height = child_view.desire_size().height;
+        let height = Self::available_height(buffer_mut_view.size(), child_view.desire_size());
         let mut child_mut_view = buffer_mut_view.as_mut_view(
             Point(0, 0),
             Size {

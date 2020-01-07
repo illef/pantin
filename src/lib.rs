@@ -50,6 +50,12 @@ pub struct Size {
     pub height: u16,
 }
 
+impl Size {
+    pub fn is_zero(&self) -> bool {
+        self.width == 0 || self.height == 0
+    }
+}
+
 pub struct PointWithCell<'a> {
     pub p: Point,
     pub cell: &'a Option<Cell>,

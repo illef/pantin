@@ -1,4 +1,5 @@
 pub mod dock_panel;
+pub mod fill;
 pub mod line_view;
 
 pub use crate::buffer::*;

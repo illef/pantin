@@ -1,8 +1,17 @@
 use super::*;
 
+#[derive(Copy, PartialEq, Clone)]
+pub enum Dock {
+    Left,
+    Right,
+    Top,
+    Bottom,
+    Full,
+}
+
 pub struct DockPanel {
     buffer_cache: Option<Buffer>,
-    childs: Vec<(Alignment, Box<dyn View>)>,
+    childs: Vec<(Dock, Box<dyn View>)>,
 }
 
 pub fn make_dock_panel() -> DockPanel {
@@ -13,8 +22,8 @@ pub fn make_dock_panel() -> DockPanel {
 }
 
 impl DockPanel {
-    pub fn add_child(&mut self, alignment: Alignment, view: Box<dyn View>) {
-        self.childs.push((alignment, view))
+    pub fn add_child(&mut self, dock: Dock, view: Box<dyn View>) {
+        self.childs.push((dock, view))
     }
 
     fn render_nothing(buffer_mut_view: BufferMutView, _: &mut Box<dyn View>) -> (Point, Size) {
@@ -107,18 +116,32 @@ impl DockPanel {
         (Point(0, height), size)
     }
 
-    fn render_child(mut buffer: Buffer, childs: &mut Vec<(Alignment, Box<dyn View>)>) -> Buffer {
+    fn render_full(
+        mut buffer_mut_view: BufferMutView,
+        child_view: &mut Box<dyn View>,
+    ) -> (Point, Size) {
+        child_view.render(&mut buffer_mut_view);
+        (
+            Point(0, 0),
+            Size {
+                width: 0,
+                height: 0,
+            },
+        )
+    }
+
+    fn render_child(mut buffer: Buffer, childs: &mut Vec<(Dock, Box<dyn View>)>) -> Buffer {
         let mut offset = Point(0, 0);
         let mut size = buffer.size();
 
         for child in childs.iter_mut() {
             let buffer_mut_view = buffer.as_mut_view(offset, size);
             let func = match child.0 {
-                Alignment::Left => Self::render_left,
-                Alignment::Bottom => Self::render_bottom,
-                Alignment::Top => Self::render_top,
-                Alignment::Right => Self::render_right,
-                _ => Self::render_nothing,
+                Dock::Left => Self::render_left,
+                Dock::Bottom => Self::render_bottom,
+                Dock::Top => Self::render_top,
+                Dock::Right => Self::render_right,
+                Dock::Full => Self::render_full,
             };
 
             let (offset_, size_) = func(buffer_mut_view, &mut child.1);

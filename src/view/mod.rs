@@ -11,13 +11,3 @@ pub trait View {
     fn desire_size(&self) -> Size;
     fn render(&mut self, buf: &mut BufferMutView);
 }
-
-#[derive(Copy, PartialEq, Clone)]
-pub enum Alignment {
-    Left,
-    Right,
-    Center,
-    Top,
-    Bottom,
-    None,
-}

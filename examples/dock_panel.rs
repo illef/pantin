@@ -19,18 +19,20 @@ fn main() {
     let mut dock_panel = view::make_dock_panel();
 
     dock_panel.add_child(
-        Alignment::Bottom,
-        Box::new(view::make_single_line_view(
+        Dock::Bottom,
+        Box::new(view::make_line_view(
             "footer",
+            1,
             color::Color::Cyan,
             color::Color::Black,
         )),
     );
 
     dock_panel.add_child(
-        Alignment::Top,
-        Box::new(view::make_single_line_view(
+        Dock::Top,
+        Box::new(view::make_line_view(
             "header",
+            1,
             color::Color::Cyan,
             color::Color::Black,
         )),

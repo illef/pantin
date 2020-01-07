@@ -2,18 +2,19 @@ use super::utils;
 use super::*;
 use std::fmt::Display;
 
-pub struct SingleLineView<D: Display> {
+pub struct LineView<D: Display> {
     display: D,
     bg: color::Color,
     fg: color::Color,
     buffer_cache: Option<Buffer>,
+    desire_height: u16,
 }
 
-impl<D: Display> View for SingleLineView<D> {
+impl<D: Display> View for LineView<D> {
     fn desire_size(&self) -> Size {
         Size {
             width: std::u16::MAX,
-            height: 1,
+            height: self.desire_height,
         }
     }
     fn render(&mut self, buf: &mut BufferMutView) {
@@ -36,15 +37,17 @@ impl<D: Display> View for SingleLineView<D> {
     }
 }
 
-pub fn make_single_line_view<D: Display>(
+pub fn make_line_view<D: Display>(
     display: D,
+    height: u16,
     bg: color::Color,
     fg: color::Color,
-) -> SingleLineView<D> {
-    SingleLineView {
+) -> LineView<D> {
+    LineView {
         display,
         bg,
         fg,
         buffer_cache: None,
+        desire_height: height,
     }
 }

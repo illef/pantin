@@ -6,6 +6,7 @@ pub use crate::buffer::*;
 pub use crate::color::*;
 pub use crate::*;
 pub use dock_panel::*;
+pub use fill::*;
 pub use line_view::*;
 
 pub trait View {

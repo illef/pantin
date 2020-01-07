@@ -148,6 +148,9 @@ impl DockPanel {
 
         for child in childs.iter_mut() {
             let buffer_mut_view = buffer.as_mut_view(offset, size);
+            if buffer_mut_view.size().is_zero() {
+                break;
+            }
             let func = match child.0 {
                 Dock::Left => Self::render_left,
                 Dock::Bottom => Self::render_bottom,

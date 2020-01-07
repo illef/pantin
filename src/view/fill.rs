@@ -17,6 +17,6 @@ impl View for Fill {
     }
 }
 
-pub fn make_fill<D: Display>(bg: color::Color, size: Size) -> Fill {
+pub fn make_fill(bg: color::Color, size: Size) -> Fill {
     Fill { bg, size }
 }

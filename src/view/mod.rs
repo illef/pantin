@@ -1,11 +1,11 @@
 pub mod dock_panel;
-pub mod single_line_view;
+pub mod line_view;
 
 pub use crate::buffer::*;
 pub use crate::color::*;
 pub use crate::*;
 pub use dock_panel::*;
-pub use single_line_view::*;
+pub use line_view::*;
 
 pub trait View {
     fn desire_size(&self) -> Size;

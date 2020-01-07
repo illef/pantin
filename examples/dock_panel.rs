@@ -16,27 +16,25 @@ fn main() {
     let mut keys = async_stdin().keys();
     let mut termion = backend::Termion::new(screen);
 
-    let mut dock_panel = view::make_dock_panel();
-
-    dock_panel.add_child(
-        Dock::Bottom,
-        Box::new(view::make_line_view(
-            "footer",
-            1,
-            color::Color::Cyan,
-            color::Color::Black,
-        )),
-    );
-
-    dock_panel.add_child(
-        Dock::Top,
-        Box::new(view::make_line_view(
-            "header",
-            1,
-            color::Color::Cyan,
-            color::Color::Black,
-        )),
-    );
+    let mut dock_panel = view::make_dock_panel()
+        .add_child(
+            Dock::Bottom,
+            Box::new(view::make_line_view(
+                "footer",
+                1,
+                color::Color::Cyan,
+                color::Color::Black,
+            )),
+        )
+        .add_child(
+            Dock::Top,
+            Box::new(view::make_line_view(
+                "header",
+                1,
+                color::Color::Cyan,
+                color::Color::Black,
+            )),
+        );
 
     loop {
         let key = keys.next();

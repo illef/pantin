@@ -22,12 +22,9 @@ pub fn make_dock_panel() -> DockPanel {
 }
 
 impl DockPanel {
-    pub fn add_child(&mut self, dock: Dock, view: Box<dyn View>) {
-        self.childs.push((dock, view))
-    }
-
-    fn render_nothing(buffer_mut_view: BufferMutView, _: &mut Box<dyn View>) -> (Point, Size) {
-        (Point(0, 0), buffer_mut_view.size())
+    pub fn add_child(mut self, dock: Dock, view: Box<dyn View>) -> Self {
+        self.childs.push((dock, view));
+        self
     }
 
     fn render_right(

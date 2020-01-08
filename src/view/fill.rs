@@ -1,6 +1,5 @@
 use super::utils;
 use super::*;
-use std::fmt::Display;
 
 pub struct Fill {
     bg: color::Color,
@@ -12,7 +11,7 @@ impl View for Fill {
         self.size
     }
     fn render(&mut self, buf: &mut BufferMutView) {
-        let cells = utils::make_infinite_cells(' ', self.bg, color::Color::Reset);
+        let cells = utils::make_infinite_cells(' ', self.bg, self.bg);
         buf.write_cells(cells);
     }
 }

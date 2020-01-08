@@ -51,7 +51,7 @@ impl DockPanel {
         let mut child_mut_view = buffer_mut_view.as_mut_view(
             Point(buffer_mut_view.size().width - width, 0),
             Size {
-                width: buffer_mut_view.size().width - width,
+                width: width,
                 height: buffer_mut_view.size().height,
             },
         );

@@ -10,31 +10,79 @@ use std::time::Duration;
 use pantin::*;
 use view::*;
 
+static mut index: usize = 0;
+
+fn get_color() -> color::Color {
+    let color = unsafe {
+        match index % 3 {
+            0 => color::Color::Yellow,
+            1 => color::Color::Blue,
+            2 => color::Color::Red,
+            _ => unreachable!(),
+        }
+    };
+
+    unsafe {
+        index += 1;
+    };
+    color
+}
+
+fn make_dock_panel(mut dock_panel: DockPanel) -> DockPanel {
+    dock_panel
+        .add_child(
+            Dock::Left,
+            Box::new(make_fill(
+                get_color(),
+                Size {
+                    width: 1,
+                    height: std::u16::MAX,
+                },
+            )),
+        )
+        .add_child(
+            Dock::Top,
+            Box::new(make_fill(
+                get_color(),
+                Size {
+                    width: std::u16::MAX,
+                    height: 1,
+                },
+            )),
+        )
+        .add_child(
+            Dock::Right,
+            Box::new(make_fill(
+                get_color(),
+                Size {
+                    width: 1,
+                    height: std::u16::MAX,
+                },
+            )),
+        )
+        .add_child(
+            Dock::Bottom,
+            Box::new(make_fill(
+                get_color(),
+                Size {
+                    width: std::u16::MAX,
+                    height: 1,
+                },
+            )),
+        )
+}
+
 fn main() {
     let screen = AlternateScreen::from(stdout().into_raw_mode().unwrap());
     let screen = termion::cursor::HideCursor::from(screen);
     let mut keys = async_stdin().keys();
     let mut termion = backend::Termion::new(screen);
 
-    let mut dock_panel = view::make_dock_panel()
-        .add_child(
-            Dock::Bottom,
-            Box::new(view::make_line_view(
-                "footer",
-                1,
-                color::Color::Cyan,
-                color::Color::Black,
-            )),
-        )
-        .add_child(
-            Dock::Top,
-            Box::new(view::make_line_view(
-                "header",
-                1,
-                color::Color::Cyan,
-                color::Color::Black,
-            )),
-        );
+    let mut dock_panel = view::make_dock_panel();
+
+    for _ in 0..100 {
+        dock_panel = make_dock_panel(dock_panel);
+    }
 
     loop {
         let key = keys.next();

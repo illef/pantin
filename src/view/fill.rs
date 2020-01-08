@@ -1,6 +1,7 @@
 use super::utils;
 use super::*;
 
+#[derive(Clone)]
 pub struct Fill {
     bg: color::Color,
     size: Size,

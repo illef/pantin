@@ -2,7 +2,8 @@ use super::utils;
 use super::*;
 use std::fmt::Display;
 
-pub struct LineView<D: Display> {
+#[derive(Clone)]
+pub struct LineView<D: Display + Clone> {
     display: D,
     bg: color::Color,
     fg: color::Color,
@@ -10,7 +11,7 @@ pub struct LineView<D: Display> {
     desire_height: u16,
 }
 
-impl<D: Display> View for LineView<D> {
+impl<D: Display + Clone> View for LineView<D> {
     fn desire_size(&self) -> Size {
         Size {
             width: std::u16::MAX,
@@ -37,7 +38,7 @@ impl<D: Display> View for LineView<D> {
     }
 }
 
-pub fn make_line_view<D: Display>(
+pub fn make_line_view<D: Display + Clone>(
     display: D,
     height: u16,
     bg: color::Color,

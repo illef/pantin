@@ -1,6 +1,7 @@
 use crate::error::*;
 use crate::*;
 
+#[derive(Clone)]
 pub struct Buffer {
     buffer: Vec<Option<Cell>>,
     size: Size,

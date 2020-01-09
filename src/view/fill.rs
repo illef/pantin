@@ -11,7 +11,7 @@ impl View for Fill {
     fn desire_size(&self) -> Size {
         self.size
     }
-    fn render(&mut self, buf: &mut BufferMutView) {
+    fn render(&mut self, buf: &mut BufferMut) {
         let cells = utils::make_infinite_cells(' ', self.bg, self.bg);
         buf.write_cells(cells);
     }

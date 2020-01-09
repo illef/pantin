@@ -13,7 +13,7 @@ pub use stack_panel::*;
 
 pub trait View {
     fn desire_size(&self) -> Size;
-    fn render(&mut self, buf: &mut BufferMutView);
+    fn render(&mut self, buf: &mut BufferMut);
 }
 
 pub fn available_width(available_size: Size, desire_size: Size) -> u16 {

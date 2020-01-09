@@ -18,7 +18,7 @@ impl<D: Display + Clone> View for LineView<D> {
             height: self.desire_height,
         }
     }
-    fn render(&mut self, buf: &mut BufferMutView) {
+    fn render(&mut self, buf: &mut BufferMut) {
         if self.buffer_cache.is_none() || self.buffer_cache.as_ref().unwrap().size() != buf.size() {
             let mut buffer_cache = Buffer::new(buf.size());
             let iter = utils::str_as_cells(self.display.to_string(), self.bg, self.fg);

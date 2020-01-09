@@ -21,7 +21,7 @@ impl<W: Write> Termion<W> {
         }
     }
 
-    pub fn get_buffer_view(&mut self) -> BufferMutView {
+    pub fn get_buffer_view(&mut self) -> BufferMut {
         if terminal_size() != self.buffer.size() {
             self.buffer = Buffer::new(terminal_size())
         }

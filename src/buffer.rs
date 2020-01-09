@@ -7,13 +7,13 @@ pub struct Buffer {
     size: Size,
 }
 
-pub struct BufferMutView<'a> {
+pub struct BufferMut<'a> {
     buffer: &'a mut Buffer,
     size: Size,
     offset: Point,
 }
 
-impl BufferMutView<'_> {
+impl BufferMut<'_> {
     pub fn size(&self) -> Size {
         self.size
     }
@@ -30,8 +30,8 @@ impl BufferMutView<'_> {
             })
     }
 
-    pub fn as_mut_view<'a>(&'a mut self, offset: Point, size: Size) -> BufferMutView<'a> {
-        BufferMutView {
+    pub fn as_mut_view<'a>(&'a mut self, offset: Point, size: Size) -> BufferMut<'a> {
+        BufferMut {
             buffer: self.buffer,
             offset: self.offset.add(offset),
             size,
@@ -101,8 +101,8 @@ impl Buffer {
         }
     }
 
-    pub fn as_mut_view<'a>(&'a mut self, offset: Point, size: Size) -> BufferMutView<'a> {
-        BufferMutView {
+    pub fn as_mut_view<'a>(&'a mut self, offset: Point, size: Size) -> BufferMut<'a> {
+        BufferMut {
             buffer: self,
             offset,
             size,

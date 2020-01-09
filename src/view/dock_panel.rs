@@ -28,7 +28,7 @@ impl DockPanel {
     }
 
     fn render_right(
-        mut buffer_mut_view: BufferMutView,
+        mut buffer_mut_view: BufferMut,
         child_view: &mut Box<dyn View>,
     ) -> (Point, Size) {
         let width = available_width(buffer_mut_view.size(), child_view.desire_size());
@@ -48,7 +48,7 @@ impl DockPanel {
     }
 
     fn render_left(
-        mut buffer_mut_view: BufferMutView,
+        mut buffer_mut_view: BufferMut,
         child_view: &mut Box<dyn View>,
     ) -> (Point, Size) {
         let width = available_width(buffer_mut_view.size(), child_view.desire_size());
@@ -68,7 +68,7 @@ impl DockPanel {
     }
 
     fn render_bottom(
-        mut buffer_mut_view: BufferMutView,
+        mut buffer_mut_view: BufferMut,
         child_view: &mut Box<dyn View>,
     ) -> (Point, Size) {
         let height = available_height(buffer_mut_view.size(), child_view.desire_size());
@@ -86,10 +86,7 @@ impl DockPanel {
         )
     }
 
-    fn render_top(
-        mut buffer_mut_view: BufferMutView,
-        child_view: &mut Box<dyn View>,
-    ) -> (Point, Size) {
+    fn render_top(mut buffer_mut_view: BufferMut, child_view: &mut Box<dyn View>) -> (Point, Size) {
         let height = available_height(buffer_mut_view.size(), child_view.desire_size());
         let mut child_mut_view = buffer_mut_view.as_mut_view(
             Point(0, 0),
@@ -109,7 +106,7 @@ impl DockPanel {
     }
 
     fn render_full(
-        mut buffer_mut_view: BufferMutView,
+        mut buffer_mut_view: BufferMut,
         child_view: &mut Box<dyn View>,
     ) -> (Point, Size) {
         child_view.render(&mut buffer_mut_view);
@@ -149,7 +146,7 @@ impl View for DockPanel {
             height: std::u16::MAX,
         }
     }
-    fn render(&mut self, buf: &mut BufferMutView) {
+    fn render(&mut self, buf: &mut BufferMut) {
         if self.buffer_cache.is_none() || self.buffer_cache.as_ref().unwrap().size() != buf.size() {
             self.buffer_cache = Some(DockPanel::render_child(
                 Buffer::new(buf.size()),

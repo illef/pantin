@@ -53,7 +53,7 @@ impl View for StackPanel {
             height: height as u16,
         }
     }
-    fn render(&mut self, buf: &mut BufferMutView) {
+    fn render(&mut self, buf: &mut BufferMut) {
         if self.buffer_cache.is_none() || self.buffer_cache.as_ref().unwrap().size() != buf.size() {
             self.buffer_cache = Some(StackPanel::render_child(
                 Buffer::new(buf.size()),

@@ -13,6 +13,7 @@ pub struct DockPanel {
     desire_size: Size,
     buffer_cache: Option<Buffer>,
     childs: Vec<(Dock, Box<dyn View>)>,
+    bg: Option<color::Color>,
 }
 
 pub fn make_dock_panel(size: Size) -> DockPanel {
@@ -20,10 +21,15 @@ pub fn make_dock_panel(size: Size) -> DockPanel {
         buffer_cache: None,
         childs: vec![],
         desire_size: size,
+        bg: None,
     }
 }
 
 impl DockPanel {
+    pub fn set_bg(mut self, bg: color::Color) -> Self {
+        self.bg = Some(bg);
+        self
+    }
     pub fn add_child(mut self, dock: Dock, view: Box<dyn View>) -> Self {
         self.childs.push((dock, view));
         self
@@ -148,7 +154,7 @@ impl View for DockPanel {
     fn render(&mut self, buf: &mut BufferMut) {
         if self.buffer_cache.is_none() || self.buffer_cache.as_ref().unwrap().size() != buf.size() {
             self.buffer_cache = Some(DockPanel::render_child(
-                Buffer::new(buf.size()),
+                Buffer::new(buf.size()).set_bg(self.bg),
                 &mut self.childs,
             ));
         }

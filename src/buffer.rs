@@ -101,6 +101,15 @@ impl Buffer {
         }
     }
 
+    pub fn set_bg(mut self, bg: Option<color::Color>) -> Self {
+        if let Some(bg) = bg {
+            let bg_iter = utils::make_infinite_cells(' ', bg, color::Color::Reset);
+            let size = self.size();
+            self.as_mut_view(Point(0, 0), size).write_cells(bg_iter);
+        }
+        self
+    }
+
     pub fn as_mut_view<'a>(&'a mut self, offset: Point, size: Size) -> BufferMut<'a> {
         BufferMut {
             buffer: self,

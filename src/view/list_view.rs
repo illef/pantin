@@ -6,6 +6,13 @@ pub struct ListView<S> {
     phantom: std::marker::PhantomData<S>,
 }
 
+impl<S> ListView<S> {
+    pub fn set_bg(mut self, bg: color::Color) -> Self {
+        self.stack_panel = self.stack_panel.set_bg(bg);
+        self
+    }
+}
+
 impl<S> View for ListView<S> {
     fn desire_size(&self) -> Size {
         self.stack_panel.desire_size()

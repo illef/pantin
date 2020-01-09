@@ -16,7 +16,7 @@ struct Person {
 }
 
 fn create_person() -> Vec<Person> {
-    (1..100)
+    (1..10)
         .map(|i| Person {
             name: "name".to_owned() + &i.to_string(),
             email: "mail".to_owned() + &i.to_string() + "@example.com",
@@ -57,7 +57,6 @@ fn main() {
     let mut termion = backend::Termion::new(screen);
 
     let person = create_person();
-    assert_eq!(person.len(), 99);
     let mut list_view = view::make_list_view(person.iter());
 
     loop {

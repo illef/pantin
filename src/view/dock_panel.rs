@@ -10,14 +10,16 @@ pub enum Dock {
 }
 
 pub struct DockPanel {
+    desire_size: Size,
     buffer_cache: Option<Buffer>,
     childs: Vec<(Dock, Box<dyn View>)>,
 }
 
-pub fn make_dock_panel() -> DockPanel {
+pub fn make_dock_panel(size: Size) -> DockPanel {
     DockPanel {
         buffer_cache: None,
         childs: vec![],
+        desire_size: size,
     }
 }
 
@@ -141,10 +143,7 @@ impl DockPanel {
 
 impl View for DockPanel {
     fn desire_size(&self) -> Size {
-        Size {
-            width: std::u16::MAX,
-            height: std::u16::MAX,
-        }
+        self.desire_size
     }
     fn render(&mut self, buf: &mut BufferMut) {
         if self.buffer_cache.is_none() || self.buffer_cache.as_ref().unwrap().size() != buf.size() {

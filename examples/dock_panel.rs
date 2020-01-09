@@ -28,7 +28,7 @@ fn get_color() -> color::Color {
     color
 }
 
-fn make_dock_panel(mut dock_panel: DockPanel) -> DockPanel {
+fn make_dock_panel(dock_panel: DockPanel) -> DockPanel {
     dock_panel
         .add_child(Dock::Left, Box::new(make_fill(get_color(), size(1, MAX))))
         .add_child(Dock::Top, Box::new(make_fill(get_color(), size(MAX, 1))))
@@ -42,7 +42,7 @@ fn main() {
     let mut keys = async_stdin().keys();
     let mut termion = backend::Termion::new(screen);
 
-    let mut dock_panel = view::make_dock_panel();
+    let mut dock_panel = view::make_dock_panel(size(MAX, MAX));
 
     for _ in 0..100 {
         dock_panel = make_dock_panel(dock_panel);

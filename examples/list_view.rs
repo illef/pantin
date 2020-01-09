@@ -26,7 +26,7 @@ fn create_person() -> Vec<Person> {
 
 impl Into<Box<dyn View>> for &Person {
     fn into(self) -> Box<dyn View> {
-        let mut dock_panel = make_dock_panel();
+        let mut dock_panel = make_dock_panel(size(MAX, 1));
         dock_panel = dock_panel
             .add_child(
                 Dock::Left,

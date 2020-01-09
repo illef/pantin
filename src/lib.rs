@@ -6,6 +6,7 @@ pub mod utils;
 pub mod view;
 
 use color::*;
+use std::ops::{Add, Sub};
 use termion::cursor;
 pub use view::View;
 
@@ -23,13 +24,6 @@ impl Point {
     pub fn is_in(&self, size: Size) -> bool {
         self.0 < size.width && self.1 < size.height
     }
-    pub fn add(&self, p: Point) -> Point {
-        Point(self.0 + p.0, self.1 + p.1)
-    }
-
-    pub fn sub(&self, p: Point) -> Point {
-        Point(self.0 - p.0, self.1 - p.1)
-    }
 
     pub fn into_index(&self, size: Size) -> usize {
         (self.0 as usize) + (self.1 as usize * size.width as usize)
@@ -40,6 +34,21 @@ impl Point {
     }
 }
 
+impl Add for Point {
+    type Output = Point;
+
+    fn add(self, p: Point) -> Self::Output {
+        Point(self.0 + p.0, self.1 + p.1)
+    }
+}
+
+impl Sub for Point {
+    type Output = Point;
+
+    fn sub(self, p: Point) -> Self::Output {
+        Point(self.0 - p.0, self.1 - p.1)
+    }
+}
 pub fn index_into_point(i: usize, size: Size) -> Point {
     Point(i as u16 % size.width, i as u16 / size.width)
 }

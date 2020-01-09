@@ -8,15 +8,12 @@ pub struct Line<D: Display + Clone> {
     bg: color::Color,
     fg: color::Color,
     buffer_cache: Option<Buffer>,
-    desire_height: u16,
+    desire_size: Size,
 }
 
 impl<D: Display + Clone> View for Line<D> {
     fn desire_size(&self) -> Size {
-        Size {
-            width: std::u16::MAX,
-            height: self.desire_height,
-        }
+        self.desire_size
     }
     fn render(&mut self, buf: &mut BufferMut) {
         if self.buffer_cache.is_none() || self.buffer_cache.as_ref().unwrap().size() != buf.size() {
@@ -40,7 +37,7 @@ impl<D: Display + Clone> View for Line<D> {
 
 pub fn make_line_view<D: Display + Clone>(
     display: D,
-    height: u16,
+    desire_size: Size,
     bg: color::Color,
     fg: color::Color,
 ) -> Line<D> {
@@ -49,6 +46,6 @@ pub fn make_line_view<D: Display + Clone>(
         bg,
         fg,
         buffer_cache: None,
-        desire_height: height,
+        desire_size,
     }
 }

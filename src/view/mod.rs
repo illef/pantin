@@ -1,6 +1,7 @@
 pub mod dock_panel;
 pub mod fill;
 pub mod line;
+pub mod list_view;
 pub mod stack_panel;
 
 pub use crate::buffer::*;
@@ -9,6 +10,7 @@ pub use crate::*;
 pub use dock_panel::*;
 pub use fill::*;
 pub use line::*;
+pub use list_view::*;
 pub use stack_panel::*;
 
 pub trait View {

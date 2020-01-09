@@ -30,46 +30,10 @@ fn get_color() -> color::Color {
 
 fn make_dock_panel(mut dock_panel: DockPanel) -> DockPanel {
     dock_panel
-        .add_child(
-            Dock::Left,
-            Box::new(make_fill(
-                get_color(),
-                Size {
-                    width: 1,
-                    height: std::u16::MAX,
-                },
-            )),
-        )
-        .add_child(
-            Dock::Top,
-            Box::new(make_fill(
-                get_color(),
-                Size {
-                    width: std::u16::MAX,
-                    height: 1,
-                },
-            )),
-        )
-        .add_child(
-            Dock::Right,
-            Box::new(make_fill(
-                get_color(),
-                Size {
-                    width: 1,
-                    height: std::u16::MAX,
-                },
-            )),
-        )
-        .add_child(
-            Dock::Bottom,
-            Box::new(make_fill(
-                get_color(),
-                Size {
-                    width: std::u16::MAX,
-                    height: 1,
-                },
-            )),
-        )
+        .add_child(Dock::Left, Box::new(make_fill(get_color(), size(1, MAX))))
+        .add_child(Dock::Top, Box::new(make_fill(get_color(), size(MAX, 1))))
+        .add_child(Dock::Right, Box::new(make_fill(get_color(), size(1, MAX))))
+        .add_child(Dock::Bottom, Box::new(make_fill(get_color(), size(MAX, 1))))
 }
 
 fn main() {

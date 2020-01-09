@@ -10,7 +10,7 @@ pub struct Termion<W: Write> {
 
 fn terminal_size() -> Size {
     let (width, height) = termion::terminal_size().unwrap();
-    Size { width, height }
+    size(width, height)
 }
 
 impl<W: Write> Termion<W> {

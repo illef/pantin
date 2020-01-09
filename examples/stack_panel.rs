@@ -28,36 +28,12 @@ fn get_color() -> color::Color {
     color
 }
 
-fn make_stack_panel(mut stack_panel: StackPanel) -> StackPanel {
+fn make_stack_panel(stack_panel: StackPanel) -> StackPanel {
     stack_panel
-        .add_child(Box::new(make_fill(
-            get_color(),
-            Size {
-                height: 5,
-                width: std::u16::MAX,
-            },
-        )))
-        .add_child(Box::new(make_fill(
-            get_color(),
-            Size {
-                height: 5,
-                width: std::u16::MAX,
-            },
-        )))
-        .add_child(Box::new(make_fill(
-            get_color(),
-            Size {
-                height: 5,
-                width: std::u16::MAX,
-            },
-        )))
-        .add_child(Box::new(make_fill(
-            get_color(),
-            Size {
-                height: 5,
-                width: std::u16::MAX,
-            },
-        )))
+        .add_child(Box::new(make_fill(get_color(), size(MAX, 5))))
+        .add_child(Box::new(make_fill(get_color(), size(MAX, 5))))
+        .add_child(Box::new(make_fill(get_color(), size(MAX, 5))))
+        .add_child(Box::new(make_fill(get_color(), size(MAX, 5))))
 }
 
 fn main() {

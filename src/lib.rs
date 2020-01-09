@@ -17,6 +17,8 @@ pub struct Cell {
     pub bg: Color,
 }
 
+pub const MAX: u16 = std::u16::MAX;
+
 #[derive(Clone, PartialEq, Copy, Debug)]
 pub struct Point(pub u16, pub u16);
 
@@ -57,6 +59,10 @@ pub fn index_into_point(i: usize, size: Size) -> Point {
 pub struct Size {
     pub width: u16,
     pub height: u16,
+}
+
+pub fn size(width: u16, height: u16) -> Size {
+    Size { width, height }
 }
 
 impl Size {

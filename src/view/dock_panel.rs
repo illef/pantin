@@ -35,17 +35,14 @@ impl DockPanel {
 
         let mut child_mut_view = buffer_mut_view.as_mut_view(
             Point(buffer_mut_view.size().width - width, 0),
-            Size {
-                width: width,
-                height: buffer_mut_view.size().height,
-            },
+            size(width, buffer_mut_view.size().height),
         );
         child_view.render(&mut child_mut_view);
         let offset = Point(0, 0);
-        let size = Size {
-            width: buffer_mut_view.size().width - width,
-            height: buffer_mut_view.size().height,
-        };
+        let size = size(
+            buffer_mut_view.size().width - width,
+            buffer_mut_view.size().height,
+        );
 
         (offset, size)
     }
@@ -56,21 +53,18 @@ impl DockPanel {
     ) -> (Point, Size) {
         let width = available_width(buffer_mut_view.size(), child_view.desire_size());
 
-        let mut child_mut_view = buffer_mut_view.as_mut_view(
-            Point(0, 0),
-            Size {
-                width,
-                height: buffer_mut_view.size().height,
-            },
-        );
+        let mut child_mut_view =
+            buffer_mut_view.as_mut_view(Point(0, 0), size(width, buffer_mut_view.size().height));
         child_view.render(&mut child_mut_view);
         let offset = Point(width, 0);
-        let size = Size {
-            width: buffer_mut_view.size().width - width,
-            height: buffer_mut_view.size().height,
-        };
 
-        (offset, size)
+        (
+            offset,
+            size(
+                buffer_mut_view.size().width - width,
+                buffer_mut_view.size().height,
+            ),
+        )
     }
 
     fn render_bottom(
@@ -80,17 +74,16 @@ impl DockPanel {
         let height = available_height(buffer_mut_view.size(), child_view.desire_size());
         let mut child_mut_view = buffer_mut_view.as_mut_view(
             Point(0, buffer_mut_view.size().height - height),
-            Size {
-                width: buffer_mut_view.size().width,
-                height: height,
-            },
+            size(buffer_mut_view.size().width, height),
         );
         child_view.render(&mut child_mut_view);
-        let size = Size {
-            width: buffer_mut_view.size().width,
-            height: buffer_mut_view.size().height - height,
-        };
-        (Point(0, 0), size)
+        (
+            Point(0, 0),
+            size(
+                buffer_mut_view.size().width,
+                buffer_mut_view.size().height - height,
+            ),
+        )
     }
 
     fn render_top(
@@ -106,11 +99,13 @@ impl DockPanel {
             },
         );
         child_view.render(&mut child_mut_view);
-        let size = Size {
-            width: buffer_mut_view.size().width,
-            height: buffer_mut_view.size().height - height,
-        };
-        (Point(0, height), size)
+        (
+            Point(0, height),
+            size(
+                buffer_mut_view.size().width,
+                buffer_mut_view.size().height - height,
+            ),
+        )
     }
 
     fn render_full(
@@ -118,13 +113,7 @@ impl DockPanel {
         child_view: &mut Box<dyn View>,
     ) -> (Point, Size) {
         child_view.render(&mut buffer_mut_view);
-        (
-            Point(0, 0),
-            Size {
-                width: 0,
-                height: 0,
-            },
-        )
+        (Point(0, 0), size(0, 0))
     }
 
     fn render_child(mut buffer: Buffer, childs: &mut Vec<(Dock, Box<dyn View>)>) -> Buffer {

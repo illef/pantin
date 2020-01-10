@@ -33,8 +33,8 @@ impl Into<Box<dyn View>> for &Person {
                 Box::new(make_line_view(
                     self.name.clone(),
                     size(10, 1),
-                    color::Color::Reset,
-                    color::Color::Reset,
+                    Color::Reset,
+                    Color::Reset,
                 )),
             )
             .add_child(
@@ -42,8 +42,8 @@ impl Into<Box<dyn View>> for &Person {
                 Box::new(make_line_view(
                     self.email.clone(),
                     size(MAX, 1),
-                    color::Color::Reset,
-                    color::Color::Reset,
+                    Color::Reset,
+                    Color::Reset,
                 )),
             );
         Box::new(dock_panel)

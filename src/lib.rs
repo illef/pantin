@@ -5,9 +5,10 @@ pub mod error;
 pub mod utils;
 pub mod view;
 
-use color::*;
 use std::ops::{Add, Sub};
 use termion::cursor;
+
+pub use color::*;
 pub use view::View;
 
 #[derive(Clone, PartialEq, Copy)]

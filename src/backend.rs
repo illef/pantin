@@ -30,8 +30,8 @@ impl<W: Write> Termion<W> {
 
     pub fn update_screen(&mut self) -> Result<(), BoxError> {
         let size = self.size();
-        let mut iter = self.buffer.iter();
-        while let Some(point_with_cell) = iter.next() {
+
+        for point_with_cell in self.buffer.iter() {
             if point_with_cell.p.is_in(size) {
                 if let Some(cell) = point_with_cell.cell {
                     write!(

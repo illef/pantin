@@ -1,14 +1,12 @@
 use super::*;
 
 pub struct StackPanel {
-    buffer_cache: Option<Buffer>,
     childs: Vec<Box<dyn View>>,
     bg: Option<color::Color>,
 }
 
 pub fn make_stack_panel() -> StackPanel {
     StackPanel {
-        buffer_cache: None,
         childs: vec![],
         bg: None,
     }
@@ -24,7 +22,7 @@ impl StackPanel {
         self
     }
 
-    fn render_child(mut buffer: Buffer, childs: &mut Vec<Box<dyn View>>) -> Buffer {
+    fn render_child(buffer: &mut BufferMut, childs: &mut Vec<Box<dyn View>>) {
         let mut offset = Point(0, 0);
         let mut size = buffer.size();
 
@@ -41,8 +39,6 @@ impl StackPanel {
                 height: buffer_mut_view.size().height - height,
             };
         }
-
-        buffer
     }
 }
 
@@ -60,12 +56,6 @@ impl View for StackPanel {
         }
     }
     fn render(&mut self, buf: &mut BufferMut) {
-        if self.buffer_cache.is_none() || self.buffer_cache.as_ref().unwrap().size() != buf.size() {
-            self.buffer_cache = Some(StackPanel::render_child(
-                Buffer::new(buf.size()).set_bg(self.bg),
-                &mut self.childs,
-            ));
-        }
-        buf.write_buffer(self.buffer_cache.as_ref().unwrap());
+        StackPanel::render_child(buf, &mut self.childs);
     }
 }

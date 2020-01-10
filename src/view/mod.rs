@@ -18,18 +18,10 @@ pub trait View {
     fn render(&mut self, buf: &mut BufferMut);
 }
 
-pub fn available_width(available_size: Size, desire_size: Size) -> u16 {
-    if available_size.width < desire_size.width {
-        available_size.width
-    } else {
-        desire_size.width
-    }
-}
-
-pub fn available_height(available_size: Size, desire_size: Size) -> u16 {
-    if available_size.height < desire_size.height {
-        available_size.height
-    } else {
-        desire_size.height
-    }
+pub fn available_size(available_size: Size, desire_size: Size) -> Size {
+    use std::cmp::min;
+    size(
+        min(available_size.width, desire_size.width),
+        min(available_size.height, desire_size.height),
+    )
 }

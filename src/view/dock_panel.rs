@@ -37,7 +37,7 @@ impl DockPanel {
         mut buffer_mut_view: BufferMut,
         child_view: &mut Box<dyn View>,
     ) -> (Point, Size) {
-        let width = available_width(buffer_mut_view.size(), child_view.desire_size());
+        let width = actual_size(buffer_mut_view.size(), child_view.desire_size()).width;
 
         let mut child_mut_view = buffer_mut_view.as_mut_view(
             Point(buffer_mut_view.size().width - width, 0),

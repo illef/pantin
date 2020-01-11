@@ -12,6 +12,7 @@ pub use dock_panel::*;
 pub use fill::*;
 pub use line::*;
 pub use list_view::*;
+pub use screen::*;
 pub use stack_panel::*;
 
 pub trait View {

@@ -1,4 +1,3 @@
-pub mod backend;
 pub mod buffer;
 pub mod color;
 pub mod error;
@@ -70,6 +69,11 @@ impl Size {
     pub fn is_zero(&self) -> bool {
         self.width == 0 || self.height == 0
     }
+}
+
+pub fn terminal_size() -> Size {
+    let (width, height) = termion::terminal_size().unwrap();
+    size(width, height)
 }
 
 pub struct PointWithCell<'a> {

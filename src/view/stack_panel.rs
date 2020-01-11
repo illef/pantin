@@ -31,7 +31,7 @@ impl StackPanel {
             if buffer_mut_view.size().is_zero() {
                 break;
             }
-            let height = available_height(buffer_mut_view.size(), child_view.desire_size());
+            let height = available_size(buffer_mut_view.size(), child_view.desire_size()).height;
             child_view.render(&mut buffer_mut_view);
             offset = offset.add(Point(0, height));
             size = Size {

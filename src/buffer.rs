@@ -26,6 +26,16 @@ impl BufferMut<'_> {
         }
     }
 
+    pub fn get_cell(&self, p: Point) -> Option<&Option<Cell>> {
+        let p = p.add(self.offset);
+        let size = self.buffer.size();
+        if p.is_in(size) {
+            Some(&self.buffer.buffer[p.into_index(size)])
+        } else {
+            None
+        }
+    }
+
     pub fn write_cell(&mut self, p: Point, cell: Option<Cell>) {
         let p = p.add(self.offset);
         let size = self.buffer.size();

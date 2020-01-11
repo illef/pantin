@@ -2,6 +2,7 @@ pub mod dock_panel;
 pub mod fill;
 pub mod line;
 pub mod list_view;
+pub mod screen;
 pub mod stack_panel;
 
 pub use crate::buffer::*;

@@ -55,7 +55,7 @@ enum Event {
     //AppStop,
 }
 
-async fn terminal_size_sender(mut sender: mpsc::Sender<Event>) -> Result<(), error::BoxError> {
+async fn send_terminal_size(mut sender: mpsc::Sender<Event>) -> Result<(), error::BoxError> {
     use tokio::time;
     let mut size = terminal_size();
 
@@ -72,12 +72,15 @@ async fn terminal_size_sender(mut sender: mpsc::Sender<Event>) -> Result<(), err
     Ok(())
 }
 
-async fn key_event_sender(mut sender: mpsc::Sender<Event>) -> Result<(), error::BoxError> {
+async fn send_key_event(mut sender: mpsc::Sender<Event>) -> Result<(), error::BoxError> {
     loop {
         if let Some(Ok(key)) =
             tokio::task::spawn_blocking(|| std::io::stdin().keys().next()).await?
         {
             sender.send(Event::KeyPressed(key)).await?;
+            if key == Key::Char('q') {
+                return Ok(());
+            }
         }
     }
 }
@@ -91,12 +94,14 @@ async fn main() {
 
     let (event_sender, mut event_receiver) = mpsc::channel(1024);
     let event_sender2 = event_sender.clone();
-    tokio::spawn(async move { terminal_size_sender(event_sender2).await });
-    tokio::spawn(async move { key_event_sender(event_sender).await });
+    tokio::spawn(async move { send_terminal_size(event_sender2).await });
+    tokio::spawn(async move { send_key_event(event_sender).await });
 
     while let Some(event) = event_receiver.next().await {
         match event {
-            Event::KeyPressed(Key::Char('q')) => break,
+            Event::KeyPressed(Key::Char('q')) => {
+                break;
+            }
             Event::SizeChanged(size) => {
                 let mut buffer = Buffer::new(size);
                 let mut buffer_mut_view = buffer.as_mut_view(Point(0, 0), buffer.size());
@@ -106,21 +111,4 @@ async fn main() {
             _ => {}
         }
     }
-
-    //loop {
-    //let key = keys.next();
-
-    //if let Some(Ok(key)) = key {
-    //if key == Key::Char('q') {
-    //break;
-    //}
-    //}
-
-    //let mut buffer = Buffer::new(terminal_size());
-    //let mut buffer_mut_view = buffer.as_mut_view(Point(0, 0), buffer.size());
-
-    //screen.render(&mut buffer_mut_view);
-
-    //std::thread::sleep(Duration::from_millis(1000 / 100));
-    //}
 }

@@ -40,13 +40,15 @@ fn main() {
     let screen = AlternateScreen::from(stdout().into_raw_mode().unwrap());
     let screen = termion::cursor::HideCursor::from(screen);
     let mut keys = async_stdin().keys();
-    let mut termion = backend::Termion::new(screen);
 
-    let mut dock_panel = view::make_dock_panel(size(MAX, MAX));
+    let mut screen = {
+        let mut dock_panel = view::make_dock_panel(size(MAX, MAX));
 
-    for _ in 0..100 {
-        dock_panel = make_dock_panel(dock_panel);
-    }
+        for _ in 0..100 {
+            dock_panel = make_dock_panel(dock_panel);
+        }
+        view::make_screen(screen, Box::new(dock_panel))
+    };
 
     loop {
         let key = keys.next();
@@ -57,14 +59,10 @@ fn main() {
             }
         }
 
-        let size = termion.size();
-        let mut termion_buffer_view = termion.get_buffer_view();
+        let mut buffer = Buffer::new(terminal_size());
+        let mut buffer_mut_view = buffer.as_mut_view(Point(0, 0), buffer.size());
 
-        let mut buffer_mut_view = termion_buffer_view.as_mut_view(Point(0, 0), size);
-
-        dock_panel.render(&mut buffer_mut_view);
-
-        termion.update_screen().unwrap();
+        screen.render(&mut buffer_mut_view);
 
         std::thread::sleep(Duration::from_millis(1000 / 100));
     }

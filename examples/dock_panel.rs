@@ -60,7 +60,7 @@ async fn terminal_size_sender(mut sender: mpsc::Sender<Event>) -> Result<(), err
     let mut size = terminal_size();
 
     sender.send(Event::SizeChanged(size)).await?;
-    let mut interval = time::interval(Duration::from_millis(100));
+    let mut interval = time::interval(Duration::from_millis(500));
 
     while let Some(_) = interval.next().await {
         let new_size = terminal_size();
@@ -73,18 +73,13 @@ async fn terminal_size_sender(mut sender: mpsc::Sender<Event>) -> Result<(), err
 }
 
 async fn key_event_sender(mut sender: mpsc::Sender<Event>) -> Result<(), error::BoxError> {
-    use tokio::time;
-    let mut interval = time::interval(Duration::from_millis(10));
-
-    let mut keys = async_stdin().keys();
-
-    while let Some(_) = interval.next().await {
-        while let Some(Ok(key)) = keys.next() {
+    loop {
+        if let Some(Ok(key)) =
+            tokio::task::spawn_blocking(|| std::io::stdin().keys().next()).await?
+        {
             sender.send(Event::KeyPressed(key)).await?;
         }
     }
-
-    Ok(())
 }
 
 #[tokio::main]

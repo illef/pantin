@@ -1,18 +1,17 @@
-use super::utils;
 use super::*;
 use std::io::prelude::*;
 
-pub struct Screen<'a, W> {
-    inner: Box<dyn View + 'a>,
+pub struct Screen<V, W> {
+    view: V,
     w: W,
 }
 
-impl<'a, W: Write> View for Screen<'a, W> {
+impl<V: View, W: Write> View for Screen<V, W> {
     fn desire_size(&self) -> Size {
-        self.inner.desire_size()
+        self.view.desire_size()
     }
     fn render(&mut self, buf: &mut BufferMut) {
-        self.inner.render(buf);
+        self.view.render(buf);
 
         for y in 0..buf.size().height {
             for x in 0..buf.size().width {
@@ -30,10 +29,10 @@ impl<'a, W: Write> View for Screen<'a, W> {
             }
         }
 
-        self.w.flush();
+        self.w.flush().unwrap_or_default();
     }
 }
 
-pub fn make_screen<'a, W: Write>(w: W, inner: Box<dyn View + 'a>) -> Screen<'a, W> {
-    Screen { w, inner }
+pub fn make_screen<V: View, W: Write>(w: W, view: V) -> Screen<V, W> {
+    Screen { w, view }
 }

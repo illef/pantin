@@ -47,7 +47,7 @@ fn main() {
         for _ in 0..100 {
             stack_panel = make_stack_panel(stack_panel);
         }
-        view::make_screen(screen, Box::new(stack_panel))
+        view::make_screen(screen, stack_panel)
     };
 
     loop {

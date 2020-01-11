@@ -56,7 +56,7 @@ fn main() {
     let mut keys = async_stdin().keys();
 
     let person = create_person();
-    let mut screen = view::make_screen(screen, Box::new(view::make_list_view(person.iter())));
+    let mut screen = view::make_screen(screen, view::make_list_view(person.iter()));
 
     loop {
         let key = keys.next();

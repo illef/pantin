@@ -47,7 +47,7 @@ fn main() {
         for _ in 0..100 {
             dock_panel = make_dock_panel(dock_panel);
         }
-        view::make_screen(screen, Box::new(dock_panel))
+        view::make_screen(screen, dock_panel)
     };
 
     loop {

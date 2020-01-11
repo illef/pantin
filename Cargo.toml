@@ -9,4 +9,4 @@ edition = "2018"
 [dependencies]
 termion = "1.5.4"
 unicode-width="0.1.7"
-bus = "2.2"
+tokio = {version = "0.2", features = ["full"]}

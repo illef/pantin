@@ -2,12 +2,12 @@ use super::utils;
 use super::*;
 use std::io::prelude::*;
 
-pub struct Screen<W> {
-    inner: Box<dyn View>,
+pub struct Screen<'a, W> {
+    inner: Box<dyn View + 'a>,
     w: W,
 }
 
-impl<W: Write> View for Screen<W> {
+impl<'a, W: Write> View for Screen<'a, W> {
     fn desire_size(&self) -> Size {
         self.inner.desire_size()
     }
@@ -34,6 +34,6 @@ impl<W: Write> View for Screen<W> {
     }
 }
 
-pub fn make_screen<W: Write>(w: W, inner: Box<dyn View>) -> Screen<W> {
+pub fn make_screen<'a, W: Write>(w: W, inner: Box<dyn View + 'a>) -> Screen<'a, W> {
     Screen { w, inner }
 }

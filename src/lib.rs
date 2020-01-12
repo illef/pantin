@@ -64,6 +64,22 @@ pub fn size(width: u16, height: u16) -> Size {
     Size { width, height }
 }
 
+impl Add for Size {
+    type Output = Size;
+
+    fn add(self, size: Size) -> Self::Output {
+        crate::size(self.width + size.width, self.height + size.height)
+    }
+}
+
+impl Sub<Point> for Size {
+    type Output = Size;
+
+    fn sub(self, p: Point) -> Self::Output {
+        size(self.width - p.0, self.height - p.1)
+    }
+}
+
 impl Size {
     pub fn is_zero(&self) -> bool {
         self.width == 0 || self.height == 0

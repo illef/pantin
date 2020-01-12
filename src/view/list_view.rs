@@ -1,4 +1,3 @@
-use super::utils;
 use super::*;
 
 pub struct ListView<S> {

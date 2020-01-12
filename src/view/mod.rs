@@ -2,6 +2,7 @@ pub mod dock_panel;
 pub mod fill;
 pub mod list_view;
 pub mod screen;
+pub mod scroll_viewer;
 pub mod stack_panel;
 pub mod textblock;
 
@@ -12,6 +13,7 @@ pub use dock_panel::*;
 pub use fill::*;
 pub use list_view::*;
 pub use screen::*;
+pub use scroll_viewer::*;
 pub use stack_panel::*;
 pub use textblock::*;
 

@@ -45,6 +45,20 @@ impl<V: View, W: Write> Screen<V, W> {
     }
 }
 
+impl<V: View + Focusable, W: Write> Focusable for Screen<V, W> {
+    fn is_focused(&self) -> bool {
+        self.view.is_focused()
+    }
+    fn set_focus(&mut self, focus: bool) {
+        self.view.set_focus(focus);
+    }
+
+    //TODO::key j, key k is hard coded, change it.
+    fn handle_key_event(&mut self, key: KeyCode) {
+        self.view.handle_key_event(key);
+    }
+}
+
 pub fn make_screen<V: View, W: Write>(w: W, view: V, initial_size: Size) -> Screen<V, W> {
     Screen {
         w,

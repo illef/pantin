@@ -5,6 +5,7 @@ pub struct ScrollViewer<V: View> {
     vertical_offset: u16,
     focused: bool,
     desire_size: Size,
+    cache_buffer: Option<Buffer>,
 }
 
 impl<V: View> ScrollViewer<V> {
@@ -26,9 +27,7 @@ impl<V: View> Focusable for ScrollViewer<V> {
     fn handle_key_event(&mut self, key: KeyCode) {
         match key {
             KeyCode::Char('j') => {
-                if self.vertical_offset < self.desire_size().height {
-                    self.vertical_offset += 1;
-                }
+                self.vertical_offset += 1;
             }
             KeyCode::Char('k') => {
                 if self.vertical_offset > 0 {
@@ -45,28 +44,39 @@ impl<V: View> View for ScrollViewer<V> {
         self.desire_size
     }
     fn render(&mut self, buf: &mut BufferMut) {
-        let size = buf.size() + size(0, self.vertical_offset);
-        if size == buf.size() {
-            self.inner_view.render(buf);
-        } else {
-            //TODO::case of vertical_offset is greater than desire_size().height
-            let mut temp_buffer = Buffer::new(size);
+        if self.cache_buffer.is_none()
+            || self.cache_buffer.as_ref().unwrap().size().width < buf.size().width
+        {
+            let desize_height = self.desire_size.height;
+            let mut buffer_cache = Buffer::new(size(buf.size().width, desize_height));
             {
-                let mut buffer_mut = temp_buffer.as_mut_view(Point(0, 0), size);
+                let mut buffer_mut = buffer_cache.as_mut_view(Point(0, 0), buffer_cache.size());
                 self.inner_view.render(&mut buffer_mut);
             }
-            let buffer_span = temp_buffer.as_mut_view(
-                Point(0, self.vertical_offset),
-                size - Point(0, self.vertical_offset),
-            );
+            self.cache_buffer = Some(buffer_cache);
+        }
+        if buf.size().height >= self.desire_size().height {
+            self.vertical_offset = 0;
+        } else if buf.size().height >= self.desire_size().height - self.vertical_offset {
+            self.vertical_offset = self.desire_size().height - buf.size().height;
+        }
 
-            assert_eq!(buffer_span.size(), buf.size());
+        assert!(self.cache_buffer.is_some());
+        assert!(self.cache_buffer.as_ref().unwrap().size() >= buf.size());
+        assert!(self.cache_buffer.as_ref().unwrap().size().height == self.desire_size.height);
 
-            for y in 0..buffer_span.size().height {
-                for x in 0..buffer_span.size().width {
-                    if let Some(cell) = buffer_span.get_cell(Point(x, y)) {
-                        buf.write_cell(Point(x, y), *cell);
-                    }
+        let buffer_span = self
+            .cache_buffer
+            .as_mut()
+            .unwrap()
+            .as_mut_view(Point(0, self.vertical_offset), buf.size());
+
+        assert_eq!(buffer_span.size(), buf.size());
+
+        for y in 0..buffer_span.size().height {
+            for x in 0..buffer_span.size().width {
+                if let Some(cell) = buffer_span.get_cell(Point(x, y)) {
+                    buf.write_cell(Point(x, y), *cell);
                 }
             }
         }
@@ -75,6 +85,7 @@ impl<V: View> View for ScrollViewer<V> {
 
 pub fn make_scroll_viewer<V: View>(v: V) -> ScrollViewer<V> {
     ScrollViewer {
+        cache_buffer: None,
         desire_size: v.desire_size(),
         inner_view: v,
         vertical_offset: 0,

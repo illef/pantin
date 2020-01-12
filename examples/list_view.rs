@@ -10,7 +10,7 @@ struct Person {
 }
 
 fn create_person() -> Vec<Person> {
-    (1..10)
+    (1..200)
         .map(|i| Person {
             name: "name".to_owned() + &i.to_string(),
             email: "mail".to_owned() + &i.to_string() + "@example.com",
@@ -27,8 +27,8 @@ impl Into<Box<dyn View>> for &Person {
                 Box::new(make_textblock(
                     self.name.clone(),
                     size(10, 1),
-                    Color::Reset,
-                    Color::Reset,
+                    Color::Cyan,
+                    Color::Black,
                 )),
             )
             .add_child(
@@ -36,8 +36,8 @@ impl Into<Box<dyn View>> for &Person {
                 Box::new(make_textblock(
                     self.email.clone(),
                     size(MAX, 1),
-                    Color::Reset,
-                    Color::Reset,
+                    Color::Cyan,
+                    Color::Black,
                 )),
             );
         Box::new(dock_panel)
@@ -48,6 +48,7 @@ impl Into<Box<dyn View>> for &Person {
 async fn main() {
     let person = create_person();
     let view = view::make_list_view(person.iter());
+    let view = view::make_scroll_viewer(view);
 
-    run(view).await;
+    run_focusable_view(view).await;
 }

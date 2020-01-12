@@ -28,15 +28,17 @@ impl StackPanel {
 
         for child_view in childs.iter_mut() {
             let mut buffer_mut_view = buffer.as_mut_view(offset, size);
-            if buffer_mut_view.size().is_zero() {
+            let available_size = available_size(buffer_mut_view.size(), child_view.desire_size());
+            if available_size.is_zero() {
                 break;
             }
-            let height = available_size(buffer_mut_view.size(), child_view.desire_size()).height;
-            child_view.render(&mut buffer_mut_view);
-            offset = offset.add(Point(0, height));
+            let mut buffer_mut = buffer_mut_view.as_mut_view(Point(0, 0), available_size);
+
+            child_view.render(&mut buffer_mut);
+            offset = offset.add(Point(0, available_size.height));
             size = Size {
                 width: buffer_mut_view.size().width,
-                height: buffer_mut_view.size().height - height,
+                height: buffer_mut_view.size().height - available_size.height,
             };
         }
     }

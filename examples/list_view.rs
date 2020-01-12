@@ -1,14 +1,8 @@
-use std::io::{stdout, Read, Write};
-use termion::async_stdin;
-use termion::event::Key;
-use termion::input::TermRead;
-use termion::raw::IntoRawMode;
-use termion::screen::AlternateScreen;
-
-use std::time::Duration;
-
 use pantin::*;
 use view::*;
+
+mod util;
+use util::*;
 
 struct Person {
     name: String,
@@ -50,28 +44,10 @@ impl Into<Box<dyn View>> for &Person {
     }
 }
 
-fn main() {
-    let screen = AlternateScreen::from(stdout().into_raw_mode().unwrap());
-    let screen = termion::cursor::HideCursor::from(screen);
-    let mut keys = async_stdin().keys();
-
+#[tokio::main]
+async fn main() {
     let person = create_person();
-    let mut screen = view::make_screen(screen, view::make_list_view(person.iter()));
+    let view = view::make_list_view(person.iter());
 
-    loop {
-        let key = keys.next();
-
-        if let Some(Ok(key)) = key {
-            if key == Key::Char('q') {
-                break;
-            }
-        }
-
-        let mut buffer = Buffer::new(terminal_size());
-        let mut buffer_mut_view = buffer.as_mut_view(Point(0, 0), buffer.size());
-
-        screen.render(&mut buffer_mut_view);
-
-        std::thread::sleep(Duration::from_millis(1000 / 100));
-    }
+    run(view).await;
 }

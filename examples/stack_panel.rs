@@ -1,14 +1,8 @@
-use std::io::{stdout, Read, Write};
-use termion::async_stdin;
-use termion::event::Key;
-use termion::input::TermRead;
-use termion::raw::IntoRawMode;
-use termion::screen::AlternateScreen;
-
-use std::time::Duration;
-
 use pantin::*;
 use view::*;
+
+mod util;
+use util::*;
 
 static mut index: usize = 0;
 
@@ -36,34 +30,12 @@ fn make_stack_panel(stack_panel: StackPanel) -> StackPanel {
         .add_child(Box::new(make_fill(get_color(), size(MAX, 5))))
 }
 
-fn main() {
-    let screen = AlternateScreen::from(stdout().into_raw_mode().unwrap());
-    let screen = termion::cursor::HideCursor::from(screen);
-    let mut keys = async_stdin().keys();
+#[tokio::main]
+async fn main() {
+    let mut stack_panel = view::make_stack_panel();
 
-    let mut screen = {
-        let mut stack_panel = view::make_stack_panel();
-
-        for _ in 0..100 {
-            stack_panel = make_stack_panel(stack_panel);
-        }
-        view::make_screen(screen, stack_panel)
-    };
-
-    loop {
-        let key = keys.next();
-
-        if let Some(Ok(key)) = key {
-            if key == Key::Char('q') {
-                break;
-            }
-        }
-
-        let mut buffer = Buffer::new(terminal_size());
-        let mut buffer_mut_view = buffer.as_mut_view(Point(0, 0), buffer.size());
-
-        screen.render(&mut buffer_mut_view);
-
-        std::thread::sleep(Duration::from_millis(1000 / 100));
+    for _ in 0..100 {
+        stack_panel = make_stack_panel(stack_panel);
     }
+    run(make_stack_panel(stack_panel)).await;
 }

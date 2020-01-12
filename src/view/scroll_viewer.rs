@@ -3,6 +3,8 @@ use super::*;
 pub struct ScrollViewer<V: View> {
     inner_view: V,
     vertical_offset: u16,
+    focused: bool,
+    desire_size: Size,
 }
 
 impl<V: View> ScrollViewer<V> {
@@ -12,9 +14,35 @@ impl<V: View> ScrollViewer<V> {
     }
 }
 
+impl<V: View> Focusable for ScrollViewer<V> {
+    fn is_focused(&self) -> bool {
+        self.focused
+    }
+    fn set_focus(&mut self, focus: bool) {
+        self.focused = focus;
+    }
+
+    //TODO::key j, key k is hard coded, change it.
+    fn handle_key_event(&mut self, key: KeyCode) {
+        match key {
+            KeyCode::Char('j') => {
+                if self.vertical_offset < self.desire_size().height {
+                    self.vertical_offset += 1;
+                }
+            }
+            KeyCode::Char('k') => {
+                if self.vertical_offset > 0 {
+                    self.vertical_offset -= 1;
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
 impl<V: View> View for ScrollViewer<V> {
     fn desire_size(&self) -> Size {
-        self.inner_view.desire_size()
+        self.desire_size
     }
     fn render(&mut self, buf: &mut BufferMut) {
         let size = buf.size() + size(0, self.vertical_offset);
@@ -47,7 +75,9 @@ impl<V: View> View for ScrollViewer<V> {
 
 pub fn make_scroll_viewer<V: View>(v: V) -> ScrollViewer<V> {
     ScrollViewer {
+        desire_size: v.desire_size(),
         inner_view: v,
         vertical_offset: 0,
+        focused: true,
     }
 }

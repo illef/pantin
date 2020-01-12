@@ -17,9 +17,18 @@ pub use scroll_viewer::*;
 pub use stack_panel::*;
 pub use textblock::*;
 
+use crossterm::event::KeyCode;
+
 pub trait View {
     fn desire_size(&self) -> Size;
     fn render(&mut self, buf: &mut BufferMut);
+}
+
+///Focuable can handle Key Event
+pub trait Focusable {
+    fn is_focused(&self) -> bool;
+    fn set_focus(&mut self, focus: bool);
+    fn handle_key_event(&mut self, key: KeyCode);
 }
 
 pub fn available_size(available_size: Size, desire_size: Size) -> Size {

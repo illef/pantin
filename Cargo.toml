@@ -7,6 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-crossterm = "0.14"
+crossterm = {version="0.14", features = ["event-stream"]}
 unicode-width="0.1.7"
 tokio = {version = "0.2", features = ["full"]}

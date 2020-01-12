@@ -6,6 +6,15 @@ pub struct Screen<V, W> {
     w: W,
 }
 
+impl<V: View, W: Write> Screen<V, W> {
+    pub fn draw(&mut self, size: Size) {
+        let mut buffer = Buffer::new(size);
+        let mut buffer_mut_view = buffer.as_mut_view(Point(0, 0), buffer.size());
+
+        self.render(&mut buffer_mut_view);
+    }
+}
+
 impl<V: View, W: Write> View for Screen<V, W> {
     fn desire_size(&self) -> Size {
         self.view.desire_size()

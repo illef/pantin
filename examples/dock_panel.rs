@@ -1,15 +1,10 @@
-use std::io::{stdout, Read, Write};
-use termion::async_stdin;
-use termion::event::Key;
-use termion::input::TermRead;
-use termion::raw::IntoRawMode;
-use termion::screen::AlternateScreen;
+use std::io::{stdout, Write};
 
-use std::time::Duration;
-use tokio::prelude::*;
 use tokio::stream::StreamExt;
 use tokio::sync::mpsc;
 
+use crossterm::event::Event;
+use crossterm::event::{KeyCode, KeyEvent};
 use pantin::*;
 use view::*;
 
@@ -48,67 +43,46 @@ fn build_view(w: impl Write) -> Screen<impl View, impl Write> {
     view::make_screen(w, dock_panel)
 }
 
-#[derive(Clone, Debug)]
-enum Event {
-    KeyPressed(Key),
-    SizeChanged(Size),
-    //AppStop,
-}
-
-async fn send_terminal_size(mut sender: mpsc::Sender<Event>) -> Result<(), error::BoxError> {
-    use tokio::time;
-    let mut size = terminal_size();
-
-    sender.send(Event::SizeChanged(size)).await?;
-    let mut interval = time::interval(Duration::from_millis(500));
-
-    while let Some(_) = interval.next().await {
-        let new_size = terminal_size();
-        if new_size != size {
-            size = new_size;
-            sender.send(Event::SizeChanged(size)).await?;
-        }
-    }
-    Ok(())
-}
-
 async fn send_key_event(mut sender: mpsc::Sender<Event>) -> Result<(), error::BoxError> {
-    loop {
-        if let Some(Ok(key)) =
-            tokio::task::spawn_blocking(|| std::io::stdin().keys().next()).await?
-        {
-            sender.send(Event::KeyPressed(key)).await?;
-            if key == Key::Char('q') {
-                return Ok(());
-            }
-        }
+    let mut event_stream = crossterm::event::EventStream::new();
+    while let Some(Ok(event)) = event_stream.next().await {
+        sender.send(event).await?;
     }
+
+    Ok(())
 }
 
 #[tokio::main]
 async fn main() {
-    let screen = AlternateScreen::from(stdout().into_raw_mode().unwrap());
-    let screen = termion::cursor::HideCursor::from(screen);
+    use crossterm::{
+        execute,
+        terminal::{EnterAlternateScreen, LeaveAlternateScreen},
+    };
 
-    let mut screen = build_view(screen);
+    crossterm::terminal::enable_raw_mode().unwrap();
+    execute!(stdout(), EnterAlternateScreen).unwrap();
+    execute!(stdout(), crossterm::cursor::Hide).unwrap();
+
+    let mut screen = build_view(stdout());
+    screen.draw(terminal_size());
 
     let (event_sender, mut event_receiver) = mpsc::channel(1024);
-    let event_sender2 = event_sender.clone();
-    tokio::spawn(async move { send_terminal_size(event_sender2).await });
     tokio::spawn(async move { send_key_event(event_sender).await });
 
     while let Some(event) = event_receiver.next().await {
         match event {
-            Event::KeyPressed(Key::Char('q')) => {
-                break;
+            Event::Key(key_event) => {
+                if key_event.code == KeyCode::Char('q') {
+                    break;
+                }
             }
-            Event::SizeChanged(size) => {
-                let mut buffer = Buffer::new(size);
-                let mut buffer_mut_view = buffer.as_mut_view(Point(0, 0), buffer.size());
-
-                screen.render(&mut buffer_mut_view);
+            Event::Resize(width, height) => {
+                screen.draw(size(width, height));
             }
             _ => {}
         }
     }
+
+    execute!(stdout(), LeaveAlternateScreen).unwrap();
+    execute!(stdout(), crossterm::cursor::Show).unwrap();
 }

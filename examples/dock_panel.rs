@@ -40,7 +40,7 @@ fn build_view(w: impl Write) -> Screen<impl View, impl Write> {
     for _ in 0..100 {
         dock_panel = make_dock_panel(dock_panel);
     }
-    view::make_screen(w, dock_panel)
+    view::make_screen(w, dock_panel, terminal_size())
 }
 
 async fn send_key_event(mut sender: mpsc::Sender<Event>) -> Result<(), error::BoxError> {
@@ -64,7 +64,7 @@ async fn main() {
     execute!(stdout(), crossterm::cursor::Hide).unwrap();
 
     let mut screen = build_view(stdout());
-    screen.draw(terminal_size());
+    screen.render(terminal_size());
 
     let (event_sender, mut event_receiver) = mpsc::channel(1024);
     tokio::spawn(async move { send_key_event(event_sender).await });
@@ -77,7 +77,7 @@ async fn main() {
                 }
             }
             Event::Resize(width, height) => {
-                screen.draw(size(width, height));
+                screen.render(size(width, height));
             }
             _ => {}
         }

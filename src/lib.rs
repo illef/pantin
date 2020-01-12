@@ -54,7 +54,7 @@ pub fn index_into_point(i: usize, size: Size) -> Point {
     Point(i as u16 % size.width, i as u16 / size.width)
 }
 
-#[derive(Clone, PartialEq, Copy, Debug)]
+#[derive(Clone, PartialEq, Copy, Debug, PartialOrd)]
 pub struct Size {
     pub width: u16,
     pub height: u16,

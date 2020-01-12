@@ -1,12 +1,8 @@
-use std::io::{stdout, Write};
-
-use tokio::stream::StreamExt;
-use tokio::sync::mpsc;
-
-use crossterm::event::Event;
-use crossterm::event::{KeyCode, KeyEvent};
 use pantin::*;
 use view::*;
+
+mod util;
+use util::*;
 
 static mut index: usize = 0;
 
@@ -34,48 +30,16 @@ fn make_dock_panel(dock_panel: DockPanel) -> DockPanel {
         .add_child(Dock::Bottom, Box::new(make_fill(get_color(), size(MAX, 1))))
 }
 
-fn build_view(w: impl Write) -> Screen<impl View, impl Write> {
+fn build_view() -> DockPanel {
     let mut dock_panel = view::make_dock_panel(size(MAX, MAX));
 
     for _ in 0..100 {
         dock_panel = make_dock_panel(dock_panel);
     }
-    view::make_screen(w, dock_panel, terminal_size())
-}
-
-async fn send_key_event(mut sender: mpsc::Sender<Event>) -> Result<(), error::BoxError> {
-    let mut event_stream = crossterm::event::EventStream::new();
-    while let Some(Ok(event)) = event_stream.next().await {
-        sender.send(event).await?;
-    }
-
-    Ok(())
+    dock_panel
 }
 
 #[tokio::main]
 async fn main() {
-    crossterm::terminal::enable_raw_mode().unwrap();
-
-    let screen = make_alternate_screen(stdout());
-    let screen = make_cursor_hided_screen(screen);
-
-    let mut screen = build_view(screen);
-    screen.render(terminal_size());
-
-    let (event_sender, mut event_receiver) = mpsc::channel(1024);
-    tokio::spawn(async move { send_key_event(event_sender).await });
-
-    while let Some(event) = event_receiver.next().await {
-        match event {
-            Event::Key(key_event) => {
-                if key_event.code == KeyCode::Char('q') {
-                    break;
-                }
-            }
-            Event::Resize(width, height) => {
-                screen.render(size(width, height));
-            }
-            _ => {}
-        }
-    }
+    run(build_view()).await;
 }

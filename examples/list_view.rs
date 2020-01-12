@@ -24,7 +24,7 @@ impl Into<Box<dyn View>> for &Person {
         dock_panel = dock_panel
             .add_child(
                 Dock::Left,
-                Box::new(make_line_view(
+                Box::new(make_textblock(
                     self.name.clone(),
                     size(10, 1),
                     Color::Reset,
@@ -33,7 +33,7 @@ impl Into<Box<dyn View>> for &Person {
             )
             .add_child(
                 Dock::Left,
-                Box::new(make_line_view(
+                Box::new(make_textblock(
                     self.email.clone(),
                     size(MAX, 1),
                     Color::Reset,

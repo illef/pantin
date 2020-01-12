@@ -1,19 +1,19 @@
 pub mod dock_panel;
 pub mod fill;
-pub mod line;
 pub mod list_view;
 pub mod screen;
 pub mod stack_panel;
+pub mod textblock;
 
 pub use crate::buffer::*;
 pub use crate::color::*;
 pub use crate::*;
 pub use dock_panel::*;
 pub use fill::*;
-pub use line::*;
 pub use list_view::*;
 pub use screen::*;
 pub use stack_panel::*;
+pub use textblock::*;
 
 pub trait View {
     fn desire_size(&self) -> Size;

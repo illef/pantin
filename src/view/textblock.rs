@@ -3,14 +3,14 @@ use super::*;
 use std::fmt::Display;
 
 #[derive(Clone)]
-pub struct Line<D: Display + Clone> {
+pub struct TextBlock<D: Display + Clone> {
     display: D,
     bg: color::Color,
     fg: color::Color,
     desire_size: Size,
 }
 
-impl<D: Display + Clone> View for Line<D> {
+impl<D: Display + Clone> View for TextBlock<D> {
     fn desire_size(&self) -> Size {
         self.desire_size
     }
@@ -23,13 +23,13 @@ impl<D: Display + Clone> View for Line<D> {
     }
 }
 
-pub fn make_line_view<D: Display + Clone>(
+pub fn make_textblock<D: Display + Clone>(
     display: D,
     desire_size: Size,
     bg: color::Color,
     fg: color::Color,
-) -> Line<D> {
-    Line {
+) -> TextBlock<D> {
+    TextBlock {
         display,
         bg,
         fg,

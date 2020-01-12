@@ -1,4 +1,8 @@
 use super::*;
+use crossterm::{
+    execute,
+    terminal::{EnterAlternateScreen, LeaveAlternateScreen},
+};
 use std::io::prelude::*;
 
 pub struct Screen<V, W> {
@@ -47,4 +51,54 @@ pub fn make_screen<V: View, W: Write>(w: W, view: V, initial_size: Size) -> Scre
         view,
         buffer: Buffer::new(initial_size),
     }
+}
+
+pub struct AlternateScreen<W: Write> {
+    w: W,
+}
+
+impl<W: Write> Drop for AlternateScreen<W> {
+    fn drop(&mut self) {
+        execute!(self.w, LeaveAlternateScreen).unwrap();
+    }
+}
+
+impl<W: Write> Write for AlternateScreen<W> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        self.w.write(buf)
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.w.flush()
+    }
+}
+
+pub fn make_alternate_screen<W: Write>(mut w: W) -> AlternateScreen<W> {
+    execute!(w, EnterAlternateScreen).unwrap();
+    AlternateScreen { w }
+}
+
+pub struct CursorHidedScreen<W: Write> {
+    w: W,
+}
+
+impl<W: Write> Drop for CursorHidedScreen<W> {
+    fn drop(&mut self) {
+        execute!(self.w, crossterm::cursor::Show).unwrap();
+    }
+}
+
+impl<W: Write> Write for CursorHidedScreen<W> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        self.w.write(buf)
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.w.flush()
+    }
+}
+
+pub fn make_cursor_hided_screen<W: Write>(mut w: W) -> CursorHidedScreen<W> {
+    execute!(w, crossterm::cursor::Hide).unwrap();
+    CursorHidedScreen { w }
 }

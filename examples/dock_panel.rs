@@ -54,16 +54,12 @@ async fn send_key_event(mut sender: mpsc::Sender<Event>) -> Result<(), error::Bo
 
 #[tokio::main]
 async fn main() {
-    use crossterm::{
-        execute,
-        terminal::{EnterAlternateScreen, LeaveAlternateScreen},
-    };
-
     crossterm::terminal::enable_raw_mode().unwrap();
-    execute!(stdout(), EnterAlternateScreen).unwrap();
-    execute!(stdout(), crossterm::cursor::Hide).unwrap();
 
-    let mut screen = build_view(stdout());
+    let screen = make_alternate_screen(stdout());
+    let screen = make_cursor_hided_screen(screen);
+
+    let mut screen = build_view(screen);
     screen.render(terminal_size());
 
     let (event_sender, mut event_receiver) = mpsc::channel(1024);
@@ -82,7 +78,4 @@ async fn main() {
             _ => {}
         }
     }
-
-    execute!(stdout(), LeaveAlternateScreen).unwrap();
-    execute!(stdout(), crossterm::cursor::Show).unwrap();
 }

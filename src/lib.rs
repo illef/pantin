@@ -5,7 +5,6 @@ pub mod utils;
 pub mod view;
 
 use std::ops::{Add, Sub};
-use termion::cursor;
 
 pub use color::*;
 pub use view::View;
@@ -31,8 +30,8 @@ impl Point {
         (self.0 as usize) + (self.1 as usize * size.width as usize)
     }
 
-    pub fn into_goto(&self) -> cursor::Goto {
-        cursor::Goto(self.0 + 1, self.1 + 1)
+    pub fn into_goto(&self) -> crossterm::cursor::MoveTo {
+        crossterm::cursor::MoveTo(self.0, self.1)
     }
 }
 
@@ -55,7 +54,7 @@ pub fn index_into_point(i: usize, size: Size) -> Point {
     Point(i as u16 % size.width, i as u16 / size.width)
 }
 
-#[derive(Clone, PartialEq, Copy, Debug)]
+#[derive(Clone, PartialEq, Copy, Debug, PartialOrd)]
 pub struct Size {
     pub width: u16,
     pub height: u16,
@@ -72,7 +71,7 @@ impl Size {
 }
 
 pub fn terminal_size() -> Size {
-    let (width, height) = termion::terminal_size().unwrap();
+    let (width, height) = crossterm::terminal::size().unwrap();
     size(width, height)
 }
 

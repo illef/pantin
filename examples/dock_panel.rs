@@ -1,17 +1,8 @@
-use std::io::{stdout, Read, Write};
-use termion::async_stdin;
-use termion::event::Key;
-use termion::input::TermRead;
-use termion::raw::IntoRawMode;
-use termion::screen::AlternateScreen;
-
-use std::time::Duration;
-use tokio::prelude::*;
-use tokio::stream::StreamExt;
-use tokio::sync::mpsc;
-
 use pantin::*;
 use view::*;
+
+mod util;
+use util::*;
 
 static mut index: usize = 0;
 
@@ -39,76 +30,16 @@ fn make_dock_panel(dock_panel: DockPanel) -> DockPanel {
         .add_child(Dock::Bottom, Box::new(make_fill(get_color(), size(MAX, 1))))
 }
 
-fn build_view(w: impl Write) -> Screen<impl View, impl Write> {
+fn build_view() -> DockPanel {
     let mut dock_panel = view::make_dock_panel(size(MAX, MAX));
 
     for _ in 0..100 {
         dock_panel = make_dock_panel(dock_panel);
     }
-    view::make_screen(w, dock_panel)
-}
-
-#[derive(Clone, Debug)]
-enum Event {
-    KeyPressed(Key),
-    SizeChanged(Size),
-    //AppStop,
-}
-
-async fn send_terminal_size(mut sender: mpsc::Sender<Event>) -> Result<(), error::BoxError> {
-    use tokio::time;
-    let mut size = terminal_size();
-
-    sender.send(Event::SizeChanged(size)).await?;
-    let mut interval = time::interval(Duration::from_millis(500));
-
-    while let Some(_) = interval.next().await {
-        let new_size = terminal_size();
-        if new_size != size {
-            size = new_size;
-            sender.send(Event::SizeChanged(size)).await?;
-        }
-    }
-    Ok(())
-}
-
-async fn send_key_event(mut sender: mpsc::Sender<Event>) -> Result<(), error::BoxError> {
-    loop {
-        if let Some(Ok(key)) =
-            tokio::task::spawn_blocking(|| std::io::stdin().keys().next()).await?
-        {
-            sender.send(Event::KeyPressed(key)).await?;
-            if key == Key::Char('q') {
-                return Ok(());
-            }
-        }
-    }
+    dock_panel
 }
 
 #[tokio::main]
 async fn main() {
-    let screen = AlternateScreen::from(stdout().into_raw_mode().unwrap());
-    let screen = termion::cursor::HideCursor::from(screen);
-
-    let mut screen = build_view(screen);
-
-    let (event_sender, mut event_receiver) = mpsc::channel(1024);
-    let event_sender2 = event_sender.clone();
-    tokio::spawn(async move { send_terminal_size(event_sender2).await });
-    tokio::spawn(async move { send_key_event(event_sender).await });
-
-    while let Some(event) = event_receiver.next().await {
-        match event {
-            Event::KeyPressed(Key::Char('q')) => {
-                break;
-            }
-            Event::SizeChanged(size) => {
-                let mut buffer = Buffer::new(size);
-                let mut buffer_mut_view = buffer.as_mut_view(Point(0, 0), buffer.size());
-
-                screen.render(&mut buffer_mut_view);
-            }
-            _ => {}
-        }
-    }
+    run(build_view()).await;
 }

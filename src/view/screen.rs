@@ -20,8 +20,8 @@ impl<V: View, W: Write> View for Screen<V, W> {
                         self.w,
                         "{}{}{}{}",
                         Point(x, y).into_goto(),
-                        Fg(cell.fg),
-                        Bg(cell.bg),
+                        SetForegroundColor(cell.fg),
+                        SetBackgroundColor(cell.bg),
                         cell.ch
                     )
                     .unwrap();

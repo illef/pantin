@@ -40,6 +40,13 @@ impl Focusable for TextBox {
                     self.string = self.string.chars().take(count - 1).collect();
                 }
             }
+            KeyCode::Enter => {
+                self.string.push('\n');
+                let new_line_count = self.string.chars().filter(|c| *c == '\n').count();
+                if (new_line_count as u16) < self.desire_size.height {
+                    self.desire_size.height += 1;
+                }
+            }
             _ => {}
         }
     }

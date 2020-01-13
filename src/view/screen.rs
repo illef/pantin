@@ -9,33 +9,44 @@ pub struct Screen<V, W> {
     view: V,
     w: W,
     buffer: Buffer,
+    cache_buffer: Buffer,
 }
 
 impl<V: View, W: Write> Screen<V, W> {
     pub fn render(&mut self, size: Size) {
         if self.buffer.size() < size {
-            self.buffer = Buffer::new(size);
+            self.buffer = Buffer::new(size * 2);
+            self.cache_buffer = self.buffer.clone();
         }
         {
             let mut buffer_mut_view = self.buffer.as_mut_view(Point(0, 0), size);
             self.view.render(&mut buffer_mut_view);
         }
 
-        for y in 0..size.height {
-            for x in 0..size.width {
-                if let Some(Some(cell)) = self.buffer.get_cell(Point(x, y)) {
+        let mut temp_buffer = Buffer::make_empty();
+        let mut temp_cache_buffer = temp_buffer.clone();
+
+        std::mem::swap(&mut temp_buffer, &mut self.buffer);
+        std::mem::swap(&mut temp_cache_buffer, &mut self.cache_buffer);
+
+        temp_buffer
+            .get_diff(&temp_cache_buffer, size)
+            .for_each(|point_with_cell| {
+                if let Some(cell) = point_with_cell.cell {
                     write!(
                         self.w,
                         "{}{}{}{}",
-                        Point(x, y).into_goto(),
+                        point_with_cell.p.into_goto(),
                         SetForegroundColor(cell.fg),
                         SetBackgroundColor(cell.bg),
                         cell.ch
                     )
                     .unwrap();
                 }
-            }
-        }
+            });
+
+        std::mem::swap(&mut temp_buffer, &mut self.cache_buffer);
+        std::mem::swap(&mut temp_cache_buffer, &mut self.buffer);
 
         self.w.flush().unwrap_or_default();
     }
@@ -63,7 +74,8 @@ pub fn make_screen<V: View, W: Write>(w: W, view: V, initial_size: Size) -> Scre
     Screen {
         w,
         view,
-        buffer: Buffer::new(initial_size),
+        buffer: Buffer::new(initial_size * 2),
+        cache_buffer: Buffer::new(initial_size * 2),
     }
 }
 

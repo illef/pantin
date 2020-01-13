@@ -16,10 +16,10 @@ impl<D: Display + Clone> View for TextBlock<D> {
     }
     fn render(&mut self, buf: &mut BufferMut) {
         let iter = utils::str_as_cells(self.display.to_string(), self.bg, self.fg);
-        //let infinite = utils::make_infinite_cells(' ', self.bg, self.fg);
-        //let cell_iter = iter.chain(infinite);
+        let infinite = utils::make_infinite_cells(' ', self.bg, self.fg);
+        let cell_iter = iter.chain(infinite);
 
-        buf.write_cells(iter);
+        buf.write_cells(cell_iter);
     }
 }
 

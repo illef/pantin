@@ -46,12 +46,6 @@ impl BufferMut<'_> {
         }
     }
 
-    pub fn write_buffer(&mut self, buffer: &Buffer) {
-        buffer.iter().for_each(|point_with_cell| {
-            self.write_cell(point_with_cell.p, *point_with_cell.cell);
-        });
-    }
-
     pub fn write_cells(&mut self, mut cells: impl Iterator<Item = Cell>) {
         use unicode_width::UnicodeWidthChar;
         let mut index = 0;
@@ -90,6 +84,13 @@ impl Buffer {
         }
     }
 
+    pub fn make_empty() -> Buffer {
+        Buffer {
+            size: size(0, 0),
+            buffer: vec![],
+        }
+    }
+
     pub fn set_bg(mut self, bg: Option<color::Color>) -> Self {
         if let Some(bg) = bg {
             let bg_iter = utils::make_infinite_cells(' ', bg, color::Color::Reset);
@@ -107,7 +108,7 @@ impl Buffer {
         }
     }
 
-    pub fn get_cell(&mut self, p: Point) -> Option<&Option<Cell>> {
+    pub fn get_cell(&self, p: Point) -> Option<&Option<Cell>> {
         if p.is_in(self.size()) {
             Some(&self.buffer[p.into_index(self.size())])
         } else {
@@ -115,11 +116,31 @@ impl Buffer {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> impl Iterator<Item = PointWithCell<'a>> + '_ {
-        let size = self.size;
-        self.buffer.iter().enumerate().map(move |(i, cell)| {
-            let p = index_into_point(i, size);
-            PointWithCell { p, cell }
+    pub fn iter<'a>(&'a self, view_size: Size) -> impl Iterator<Item = PointWithCell<'a>> + '_ {
+        let buffer_size = self.size;
+        self.buffer.iter().enumerate().filter_map(move |(i, cell)| {
+            let p = index_into_point(i, buffer_size);
+            if p.is_in(view_size) {
+                Some(PointWithCell { p, cell })
+            } else {
+                None
+            }
+        })
+    }
+
+    pub fn get_diff<'a>(
+        &'a self,
+        old: &'a Buffer,
+        view_size: Size,
+    ) -> impl Iterator<Item = PointWithCell<'a>> + '_ {
+        self.iter(view_size).filter(move |point_with_cell| {
+            let old_cell = old.get_cell(point_with_cell.p);
+
+            if let Some(cell) = old_cell {
+                cell != point_with_cell.cell
+            } else {
+                true
+            }
         })
     }
 

@@ -4,7 +4,7 @@ pub mod error;
 pub mod utils;
 pub mod view;
 
-use std::ops::{Add, Sub};
+use std::ops::{Add, Mul, Sub};
 
 pub use color::*;
 pub use view::View;
@@ -77,6 +77,14 @@ impl Sub<Point> for Size {
 
     fn sub(self, p: Point) -> Self::Output {
         size(self.width - p.0, self.height - p.1)
+    }
+}
+
+impl Mul<u16> for Size {
+    type Output = Size;
+
+    fn mul(self, m: u16) -> Self::Output {
+        size(self.width * m, self.height * m)
     }
 }
 

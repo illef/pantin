@@ -5,6 +5,7 @@ pub mod screen;
 pub mod scroll_viewer;
 pub mod stack_panel;
 pub mod textblock;
+pub mod textbox;
 
 pub use crate::buffer::*;
 pub use crate::color::*;

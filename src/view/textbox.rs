@@ -31,10 +31,15 @@ impl Focusable for TextBox {
         self.focused = focus;
     }
 
-    //TODO::key j, key k is hard coded, change it.
     fn handle_key_event(&mut self, key: KeyCode) {
         match key {
             KeyCode::Char(c) => self.string.push(c),
+            KeyCode::Backspace => {
+                let count = self.string.chars().count();
+                if count > 0 {
+                    self.string = self.string.chars().take(count - 1).collect();
+                }
+            }
             _ => {}
         }
     }

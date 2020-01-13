@@ -17,6 +17,7 @@ pub use screen::*;
 pub use scroll_viewer::*;
 pub use stack_panel::*;
 pub use textblock::*;
+pub use textbox::*;
 
 use crossterm::event::KeyCode;
 

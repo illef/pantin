@@ -14,6 +14,7 @@ pub struct Screen<V, W> {
 
 impl<V: View, W: Write> Screen<V, W> {
     pub fn render(&mut self, size: Size) {
+        let size = available_size(size, self.desire_size());
         if self.buffer.size() < size {
             self.buffer = Buffer::new(size * 2);
             self.cache_buffer = self.buffer.clone();

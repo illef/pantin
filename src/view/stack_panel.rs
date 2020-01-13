@@ -1,13 +1,13 @@
 use super::*;
 
 pub struct StackPanel {
-    childs: Vec<Box<dyn View>>,
+    children: Vec<Box<dyn View>>,
     bg: Option<color::Color>,
 }
 
 pub fn make_stack_panel() -> StackPanel {
     StackPanel {
-        childs: vec![],
+        children: vec![],
         bg: None,
     }
 }
@@ -17,16 +17,25 @@ impl StackPanel {
         self.bg = Some(bg);
         self
     }
+
+    pub fn clear_children(&mut self) {
+        self.children.clear();
+    }
+
+    pub fn get_children(&mut self) -> &mut Vec<Box<dyn View>> {
+        &mut self.children
+    }
+
     pub fn add_child(mut self, view: Box<dyn View>) -> Self {
-        self.childs.push(view);
+        self.children.push(view);
         self
     }
 
-    fn render_child(buffer: &mut BufferMut, childs: &mut Vec<Box<dyn View>>) {
+    fn render_child(buffer: &mut BufferMut, children: &mut Vec<Box<dyn View>>) {
         let mut offset = Point(0, 0);
         let mut size = buffer.size();
 
-        for child_view in childs.iter_mut() {
+        for child_view in children.iter_mut() {
             let mut buffer_mut_view = buffer.as_mut_view(offset, size);
             let available_size = available_size(buffer_mut_view.size(), child_view.desire_size());
             if available_size.is_zero() {
@@ -47,7 +56,7 @@ impl StackPanel {
 impl View for StackPanel {
     fn desire_size(&self) -> Size {
         let height: u64 = self
-            .childs
+            .children
             .iter()
             .map(|view| view.desire_size().height as u64)
             .sum();
@@ -58,6 +67,6 @@ impl View for StackPanel {
         }
     }
     fn render(&mut self, buf: &mut BufferMut) {
-        StackPanel::render_child(buf, &mut self.childs);
+        StackPanel::render_child(buf, &mut self.children);
     }
 }

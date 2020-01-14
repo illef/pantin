@@ -50,5 +50,5 @@ async fn main() {
     let view = view::make_list_view(person.iter());
     let view = view::make_scroll_viewer(view);
 
-    run_focusable_view(view).await;
+    run(view).await;
 }

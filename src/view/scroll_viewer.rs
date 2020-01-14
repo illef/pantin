@@ -15,10 +15,15 @@ impl<V: View> ScrollViewer<V> {
     }
 }
 
-impl<V: View> Focusable for ScrollViewer<V> {
+impl<V: View> View for ScrollViewer<V> {
+    fn is_focusable(&self) -> bool {
+        true
+    }
+
     fn is_focused(&self) -> bool {
         self.focused
     }
+
     fn set_focus(&mut self, focus: bool) {
         self.focused = focus;
     }
@@ -37,9 +42,6 @@ impl<V: View> Focusable for ScrollViewer<V> {
             _ => {}
         }
     }
-}
-
-impl<V: View> View for ScrollViewer<V> {
     fn desire_size(&self) -> Size {
         self.desire_size
     }

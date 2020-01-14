@@ -40,9 +40,10 @@ impl View for TextBox {
 
         Some(Point(pos_x, 0))
     }
-}
+    fn is_focusable(&self) -> bool {
+        true
+    }
 
-impl Focusable for TextBox {
     fn is_focused(&self) -> bool {
         self.focused
     }

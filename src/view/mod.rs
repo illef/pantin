@@ -27,13 +27,16 @@ pub trait View {
     fn get_cursor_pos(&self) -> Option<Point> {
         None
     }
-}
 
-///Focuable can handle Key Event
-pub trait Focusable {
-    fn is_focused(&self) -> bool;
-    fn set_focus(&mut self, focus: bool);
-    fn handle_key_event(&mut self, key: KeyCode);
+    //for focusable
+    fn is_focusable(&self) -> bool {
+        false
+    }
+    fn is_focused(&self) -> bool {
+        false
+    }
+    fn set_focus(&mut self, _: bool) {}
+    fn handle_key_event(&mut self, _: KeyCode) {}
 }
 
 pub fn available_size(available_size: Size, desire_size: Size) -> Size {

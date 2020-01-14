@@ -7,6 +7,30 @@ struct InfiniteCells {
     fg: color::Color,
 }
 
+struct Cursor {
+    called: bool,
+    bg: color::Color,
+    fg: color::Color,
+}
+
+impl Iterator for Cursor {
+    type Item = Cell;
+
+    fn next(&mut self) -> Option<Cell> {
+        if self.called == false {
+            self.called = true;
+            Some(Cell {
+                ch: ' ',
+                bg: self.bg,
+                fg: self.fg,
+                cursor_on: true,
+            })
+        } else {
+            None
+        }
+    }
+}
+
 impl Iterator for InfiniteCells {
     type Item = Cell;
 
@@ -15,6 +39,7 @@ impl Iterator for InfiniteCells {
             ch: self.ch,
             bg: self.bg,
             fg: self.fg,
+            cursor_on: false,
         })
     }
 }
@@ -24,7 +49,12 @@ pub fn chars_into_cells(
     bg: color::Color,
     fg: color::Color,
 ) -> impl Iterator<Item = Cell> {
-    chars.map(move |ch| Cell { ch, bg, fg })
+    chars.map(move |ch| Cell {
+        ch,
+        bg,
+        fg,
+        cursor_on: false,
+    })
 }
 
 pub fn str_as_cells<S: AsRef<str>>(
@@ -34,6 +64,14 @@ pub fn str_as_cells<S: AsRef<str>>(
 ) -> impl Iterator<Item = Cell> {
     let vec: Vec<char> = s.as_ref().chars().collect();
     chars_into_cells(vec.into_iter(), bg, fg)
+}
+
+pub fn make_cursor_cell(bg: color::Color, fg: color::Color) -> impl Iterator<Item = Cell> {
+    Cursor {
+        bg,
+        fg,
+        called: false,
+    }
 }
 
 pub fn make_infinite_cells(

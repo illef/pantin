@@ -21,25 +21,13 @@ impl View for TextBox {
         self.desire_size
     }
     fn render(&mut self, buf: &mut BufferMut) {
-        let iter = utils::str_as_cells(&self.string, self.bg, self.fg);
-        let infinite = utils::make_infinite_cells(' ', self.bg, self.fg);
-        let cell_iter = iter.chain(infinite);
+        let iter = utils::str_as_cells(&self.string, self.bg, self.fg)
+            .chain(utils::make_cursor_cell(self.bg, self.fg))
+            .chain(utils::make_infinite_cells(' ', self.bg, self.fg));
 
-        buf.write_cells(cell_iter);
+        buf.write_cells(iter);
     }
 
-    fn get_cursor_pos(&self) -> Option<Point> {
-        let pos_x = self
-            .string
-            .chars()
-            .map(|ch: char| {
-                use unicode_width::UnicodeWidthChar;
-                ch.width().unwrap() as u16
-            })
-            .sum();
-
-        Some(Point(pos_x, 0))
-    }
     fn is_focusable(&self) -> bool {
         true
     }

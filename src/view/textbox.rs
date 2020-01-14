@@ -2,21 +2,23 @@ use super::utils;
 use super::*;
 
 #[derive(Clone)]
-pub struct TextBox {
+pub struct TextBox<E: AsKeyEvent> {
     string: String,
     bg: color::Color,
     fg: color::Color,
     desire_size: Size,
     focused: bool,
+    phantom: std::marker::PhantomData<E>,
 }
 
-impl TextBox {
+impl<E: AsKeyEvent> TextBox<E> {
     pub fn get_text(&self) -> &String {
         &self.string
     }
 }
 
-impl View for TextBox {
+impl<E: AsKeyEvent> View for TextBox<E> {
+    type Event = E;
     fn desire_size(&self) -> Size {
         self.desire_size
     }
@@ -52,12 +54,17 @@ impl View for TextBox {
     }
 }
 
-pub fn make_textbox(desire_size: Size, bg: color::Color, fg: color::Color) -> TextBox {
+pub fn make_textbox<E: AsKeyEvent>(
+    desire_size: Size,
+    bg: color::Color,
+    fg: color::Color,
+) -> TextBox<E> {
     TextBox {
         string: String::new(),
         bg,
         fg,
         desire_size,
         focused: true,
+        phantom: std::marker::PhantomData,
     }
 }

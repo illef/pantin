@@ -3,14 +3,16 @@ use super::*;
 use std::fmt::Display;
 
 #[derive(Clone)]
-pub struct TextBlock<D: Display + Clone> {
+pub struct TextBlock<D: Display + Clone, E: AsKeyEvent> {
     display: D,
     bg: color::Color,
     fg: color::Color,
     desire_size: Size,
+    phantom: std::marker::PhantomData<E>,
 }
 
-impl<D: Display + Clone> View for TextBlock<D> {
+impl<D: Display + Clone, E: AsKeyEvent> View for TextBlock<D, E> {
+    type Event = E;
     fn desire_size(&self) -> Size {
         self.desire_size
     }
@@ -23,16 +25,17 @@ impl<D: Display + Clone> View for TextBlock<D> {
     }
 }
 
-pub fn make_textblock<D: Display + Clone>(
+pub fn make_textblock<D: Display + Clone, E: AsKeyEvent>(
     display: D,
     desire_size: Size,
     bg: color::Color,
     fg: color::Color,
-) -> TextBlock<D> {
+) -> TextBlock<D, E> {
     TextBlock {
         display,
         bg,
         fg,
         desire_size,
+        phantom: std::marker::PhantomData,
     }
 }

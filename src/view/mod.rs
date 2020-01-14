@@ -21,7 +21,12 @@ pub use textbox::*;
 
 use crossterm::event::KeyCode;
 
+pub trait AsKeyEvent {
+    fn as_key_event(&self) -> Option<KeyCode>;
+}
+
 pub trait View {
+    type Event: AsKeyEvent;
     fn desire_size(&self) -> Size;
     fn render(&mut self, buf: &mut BufferMut);
 

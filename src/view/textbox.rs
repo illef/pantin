@@ -10,6 +10,12 @@ pub struct TextBox {
     focused: bool,
 }
 
+impl TextBox {
+    pub fn get_text(&self) -> &String {
+        &self.string
+    }
+}
+
 impl View for TextBox {
     fn desire_size(&self) -> Size {
         self.desire_size
@@ -38,13 +44,6 @@ impl Focusable for TextBox {
                 let count = self.string.chars().count();
                 if count > 0 {
                     self.string = self.string.chars().take(count - 1).collect();
-                }
-            }
-            KeyCode::Enter => {
-                self.string.push('\n');
-                let new_line_count = self.string.chars().filter(|c| *c == '\n').count();
-                if (new_line_count as u16) < self.desire_size.height {
-                    self.desire_size.height += 1;
                 }
             }
             _ => {}

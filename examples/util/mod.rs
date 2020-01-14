@@ -2,20 +2,21 @@ pub use crossterm::event::Event;
 pub use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use pantin::view::*;
 use std::io::stdout;
-use tokio::stream::StreamExt;
-use tokio::sync::mpsc;
+pub use tokio::stream::StreamExt;
+pub use tokio::sync::mpsc;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum BasicEvent {
     Key(KeyEvent),
     Resize(Size),
     Other,
 }
 
-impl AsKeyEvent for BasicEvent {
-    fn as_key_event(&self) -> Option<KeyEvent> {
+impl AsUIEvent for BasicEvent {
+    fn as_ui_event(&self) -> Option<Event> {
         match self {
-            BasicEvent::Key(key_event) => Some(*key_event),
+            BasicEvent::Key(key_event) => Some(Event::Key(*key_event)),
+            BasicEvent::Resize(size) => Some(Event::Resize(size.width, size.height)),
             _ => None,
         }
     }
@@ -28,16 +29,21 @@ impl AsKeyEvent for BasicEvent {
     }
 }
 
-async fn send_key_event(mut sender: mpsc::Sender<BasicEvent>) -> Result<(), error::BoxError> {
+pub async fn send_key_event<E: AsUIEvent + 'static>(
+    mut sender: mpsc::Sender<E>,
+) -> Result<(), error::BoxError> {
     let mut event_stream = crossterm::event::EventStream::new();
     while let Some(Ok(event)) = event_stream.next().await {
-        sender.send(BasicEvent::from_tui_event(event)).await?;
+        sender.send(E::from_tui_event(event)).await?;
     }
 
     Ok(())
 }
 
-pub async fn run<E: AsKeyEvent, V: View<Event = E>>(view: V) {
+pub async fn run<E: AsUIEvent + 'static, V: View<Event = E>>(
+    view: V,
+    mut event_receiver: mpsc::Receiver<E>,
+) {
     crossterm::terminal::enable_raw_mode().unwrap();
 
     let screen = make_alternate_screen(stdout());
@@ -46,12 +52,9 @@ pub async fn run<E: AsKeyEvent, V: View<Event = E>>(view: V) {
     let mut screen = make_screen(screen, view, terminal_size());
     screen.render(terminal_size());
 
-    let (event_sender, mut event_receiver) = mpsc::channel(1024);
-    tokio::spawn(async move { send_key_event(event_sender).await });
-
     while let Some(event) = event_receiver.next().await {
-        match event {
-            BasicEvent::Key(key_event) => {
+        match event.as_ui_event() {
+            Some(Event::Key(key_event)) => {
                 if key_event.code == KeyCode::Char('c')
                     && key_event.modifiers == KeyModifiers::CONTROL
                 {
@@ -61,8 +64,8 @@ pub async fn run<E: AsKeyEvent, V: View<Event = E>>(view: V) {
                     screen.render(terminal_size());
                 }
             }
-            BasicEvent::Resize(size) => {
-                screen.render(size);
+            Some(Event::Resize(width, height)) => {
+                screen.render(size(width, height));
             }
             _ => {}
         }

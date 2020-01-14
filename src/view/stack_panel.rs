@@ -1,18 +1,18 @@
 use super::*;
 
-pub struct StackPanel<E: AsKeyEvent> {
+pub struct StackPanel<E: AsUIEvent> {
     children: Vec<Box<dyn View<Event = E>>>,
     bg: Option<color::Color>,
 }
 
-pub fn make_stack_panel<E: AsKeyEvent>() -> StackPanel<E> {
+pub fn make_stack_panel<E: AsUIEvent>() -> StackPanel<E> {
     StackPanel {
         children: vec![],
         bg: None,
     }
 }
 
-impl<E: AsKeyEvent> StackPanel<E> {
+impl<E: AsUIEvent> StackPanel<E> {
     pub fn set_bg(mut self, bg: color::Color) -> Self {
         self.bg = Some(bg);
         self
@@ -53,7 +53,7 @@ impl<E: AsKeyEvent> StackPanel<E> {
     }
 }
 
-impl<E: AsKeyEvent> View for StackPanel<E> {
+impl<E: AsUIEvent> View for StackPanel<E> {
     type Event = E;
     fn desire_size(&self) -> Size {
         let height: u64 = self

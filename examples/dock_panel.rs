@@ -41,5 +41,7 @@ fn build_view() -> DockPanel<BasicEvent> {
 
 #[tokio::main]
 async fn main() {
-    run(build_view()).await;
+    let (event_sender, event_receiver) = mpsc::channel(1024);
+    tokio::spawn(async move { send_key_event::<BasicEvent>(event_sender).await });
+    run(build_view(), event_receiver).await;
 }

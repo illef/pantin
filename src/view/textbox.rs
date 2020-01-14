@@ -1,7 +1,7 @@
 use super::utils;
 use super::*;
 
-pub struct TextBox<E: AsKeyEvent> {
+pub struct TextBox<E: AsUIEvent> {
     string: String,
     bg: color::Color,
     fg: color::Color,
@@ -11,7 +11,7 @@ pub struct TextBox<E: AsKeyEvent> {
     text_changed_callback: Vec<Box<dyn FnMut(&str)>>,
 }
 
-impl<E: AsKeyEvent> TextBox<E> {
+impl<E: AsUIEvent> TextBox<E> {
     pub fn get_text(&self) -> &String {
         &self.string
     }
@@ -21,7 +21,7 @@ impl<E: AsKeyEvent> TextBox<E> {
     }
 }
 
-impl<E: AsKeyEvent> View for TextBox<E> {
+impl<E: AsUIEvent> View for TextBox<E> {
     type Event = E;
     fn desire_size(&self) -> Size {
         self.desire_size
@@ -65,7 +65,7 @@ impl<E: AsKeyEvent> View for TextBox<E> {
     }
 }
 
-pub fn make_textbox<E: AsKeyEvent>(
+pub fn make_textbox<E: AsUIEvent>(
     desire_size: Size,
     bg: color::Color,
     fg: color::Color,

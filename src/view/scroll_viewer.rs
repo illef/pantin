@@ -1,6 +1,6 @@
 use super::*;
 
-pub struct ScrollViewer<V: View, E: AsKeyEvent> {
+pub struct ScrollViewer<V: View, E: AsUIEvent> {
     inner_view: V,
     vertical_offset: u16,
     focused: bool,
@@ -9,14 +9,14 @@ pub struct ScrollViewer<V: View, E: AsKeyEvent> {
     phantom: std::marker::PhantomData<E>,
 }
 
-impl<V: View, E: AsKeyEvent> ScrollViewer<V, E> {
+impl<V: View, E: AsUIEvent> ScrollViewer<V, E> {
     fn set_vertical_offset(&mut self, mut new_offset: u16) -> u16 {
         std::mem::swap(&mut self.vertical_offset, &mut new_offset);
         new_offset
     }
 }
 
-impl<V: View, E: AsKeyEvent> View for ScrollViewer<V, E> {
+impl<V: View, E: AsUIEvent> View for ScrollViewer<V, E> {
     type Event = E;
     fn is_focusable(&self) -> bool {
         true
@@ -87,7 +87,7 @@ impl<V: View, E: AsKeyEvent> View for ScrollViewer<V, E> {
     }
 }
 
-pub fn make_scroll_viewer<V: View, E: AsKeyEvent>(v: V) -> ScrollViewer<V, E> {
+pub fn make_scroll_viewer<V: View, E: AsUIEvent>(v: V) -> ScrollViewer<V, E> {
     ScrollViewer {
         cache_buffer: None,
         desire_size: v.desire_size(),

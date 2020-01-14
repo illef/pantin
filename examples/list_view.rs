@@ -50,5 +50,7 @@ async fn main() {
     let view = view::make_list_view(person.iter());
     let view = view::make_scroll_viewer::<view::ListView<&Person, BasicEvent>, BasicEvent>(view);
 
-    run(view).await;
+    let (event_sender, event_receiver) = mpsc::channel(1024);
+    tokio::spawn(async move { send_key_event::<BasicEvent>(event_sender).await });
+    run(view, event_receiver).await;
 }

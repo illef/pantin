@@ -9,13 +9,13 @@ pub enum Dock {
     Full,
 }
 
-pub struct DockPanel<E: AsKeyEvent> {
+pub struct DockPanel<E: AsUIEvent> {
     desire_size: Size,
     childs: Vec<(Dock, Box<dyn View<Event = E>>)>,
     bg: Option<color::Color>,
 }
 
-pub fn make_dock_panel<Event: AsKeyEvent>(size: Size) -> DockPanel<Event> {
+pub fn make_dock_panel<Event: AsUIEvent>(size: Size) -> DockPanel<Event> {
     DockPanel {
         childs: vec![],
         desire_size: size,
@@ -23,7 +23,7 @@ pub fn make_dock_panel<Event: AsKeyEvent>(size: Size) -> DockPanel<Event> {
     }
 }
 
-impl<E: AsKeyEvent> DockPanel<E> {
+impl<E: AsUIEvent> DockPanel<E> {
     pub fn set_bg(mut self, bg: color::Color) -> Self {
         self.bg = Some(bg);
         self
@@ -146,7 +146,7 @@ impl<E: AsKeyEvent> DockPanel<E> {
     }
 }
 
-impl<E: AsKeyEvent> View for DockPanel<E> {
+impl<E: AsUIEvent> View for DockPanel<E> {
     type Event = E;
     fn desire_size(&self) -> Size {
         self.desire_size

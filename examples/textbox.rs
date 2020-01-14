@@ -3,7 +3,7 @@ use pantin::*;
 mod util;
 use util::*;
 
-fn make_view() -> view::DockPanel {
+fn make_view() -> view::DockPanel<BasicEvent> {
     view::make_dock_panel(size(MAX, MAX)).add_child(
         view::Dock::Bottom,
         Box::new(view::make_textbox(

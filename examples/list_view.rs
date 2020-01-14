@@ -18,9 +18,9 @@ fn create_person() -> Vec<Person> {
         .collect()
 }
 
-impl Into<Box<dyn View>> for &Person {
-    fn into(self) -> Box<dyn View> {
-        let mut dock_panel = make_dock_panel(size(MAX, 1));
+impl Into<Box<dyn View<Event = BasicEvent>>> for &Person {
+    fn into(self) -> Box<dyn View<Event = BasicEvent>> {
+        let mut dock_panel = make_dock_panel::<BasicEvent>(size(MAX, 1));
         dock_panel = dock_panel
             .add_child(
                 Dock::Left,
@@ -48,7 +48,7 @@ impl Into<Box<dyn View>> for &Person {
 async fn main() {
     let person = create_person();
     let view = view::make_list_view(person.iter());
-    let view = view::make_scroll_viewer(view);
+    let view = view::make_scroll_viewer::<view::ListView<&Person, BasicEvent>, BasicEvent>(view);
 
     run(view).await;
 }

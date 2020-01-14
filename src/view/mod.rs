@@ -19,10 +19,11 @@ pub use stack_panel::*;
 pub use textblock::*;
 pub use textbox::*;
 
-use crossterm::event::KeyCode;
+use crossterm::event::{KeyCode, KeyEvent};
 
 pub trait AsKeyEvent {
-    fn as_key_event(&self) -> Option<KeyCode>;
+    fn as_key_event(&self) -> Option<KeyEvent>;
+    fn from_tui_event(e: crossterm::event::Event) -> Self;
 }
 
 pub trait View {

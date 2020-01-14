@@ -14,6 +14,7 @@ pub struct Cell {
     pub ch: char,
     pub fg: Color,
     pub bg: Color,
+    pub cursor_on: bool,
 }
 
 pub const MAX: u16 = std::u16::MAX;

@@ -30,6 +30,8 @@ impl<V: View, W: Write> Screen<V, W> {
         std::mem::swap(&mut temp_buffer, &mut self.buffer);
         std::mem::swap(&mut temp_cache_buffer, &mut self.cache_buffer);
 
+        let mut cursor_on_cell = None;
+
         temp_buffer
             .get_diff(&temp_cache_buffer, size)
             .for_each(|point_with_cell| {
@@ -43,6 +45,9 @@ impl<V: View, W: Write> Screen<V, W> {
                         cell.ch
                     )
                     .unwrap();
+                    if cell.cursor_on {
+                        cursor_on_cell = Some((point_with_cell.p, *cell))
+                    }
                 }
             });
 
@@ -50,9 +55,9 @@ impl<V: View, W: Write> Screen<V, W> {
         std::mem::swap(&mut temp_cache_buffer, &mut self.buffer);
 
         //cursor position
-        if let Some(cursor_pos) = self.view.get_cursor_pos() {
+        if let Some(cursor_pos) = cursor_on_cell {
             write!(self.w, "{}", crossterm::cursor::Show).unwrap();
-            write!(self.w, "{}", cursor_pos.into_goto()).unwrap();
+            write!(self.w, "{}", cursor_pos.0.into_goto()).unwrap();
         } else {
             write!(self.w, "{}", crossterm::cursor::Hide).unwrap();
         }

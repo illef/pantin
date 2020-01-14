@@ -178,16 +178,4 @@ impl View for DockPanel {
             child.1.handle_key_event(key);
         }
     }
-    fn get_cursor_pos(&self) -> Option<Point> {
-        if let Some(child) = self
-            .childs
-            .iter()
-            .filter(|child| child.1.is_focused())
-            .next()
-        {
-            child.1.get_cursor_pos()
-        } else {
-            None
-        }
-    }
 }

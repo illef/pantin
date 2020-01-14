@@ -24,9 +24,6 @@ use crossterm::event::KeyCode;
 pub trait View {
     fn desire_size(&self) -> Size;
     fn render(&mut self, buf: &mut BufferMut);
-    fn get_cursor_pos(&self) -> Option<Point> {
-        None
-    }
 
     //for focusable
     fn is_focusable(&self) -> bool {

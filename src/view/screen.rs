@@ -49,6 +49,13 @@ impl<V: View, W: Write> Screen<V, W> {
         std::mem::swap(&mut temp_buffer, &mut self.cache_buffer);
         std::mem::swap(&mut temp_cache_buffer, &mut self.buffer);
 
+        //cursor position
+        if let Some(cursor_pos) = self.view.get_cursor_pos() {
+            write!(self.w, "{}", crossterm::cursor::Show).unwrap();
+            write!(self.w, "{}", cursor_pos.into_goto()).unwrap();
+        } else {
+            write!(self.w, "{}", crossterm::cursor::Hide).unwrap();
+        }
         self.w.flush().unwrap_or_default();
     }
 

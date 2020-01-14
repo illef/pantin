@@ -27,6 +27,19 @@ impl View for TextBox {
 
         buf.write_cells(cell_iter);
     }
+
+    fn get_cursor_pos(&self) -> Option<Point> {
+        let pos_x = self
+            .string
+            .chars()
+            .map(|ch: char| {
+                use unicode_width::UnicodeWidthChar;
+                ch.width().unwrap() as u16
+            })
+            .sum();
+
+        Some(Point(pos_x, 0))
+    }
 }
 
 impl Focusable for TextBox {

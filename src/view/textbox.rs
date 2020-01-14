@@ -1,7 +1,6 @@
 use super::utils;
 use super::*;
 
-#[derive(Clone)]
 pub struct TextBox<E: AsKeyEvent> {
     string: String,
     bg: color::Color,
@@ -9,11 +8,16 @@ pub struct TextBox<E: AsKeyEvent> {
     desire_size: Size,
     focused: bool,
     phantom: std::marker::PhantomData<E>,
+    text_changed_callback: Vec<Box<dyn FnMut(&str)>>,
 }
 
 impl<E: AsKeyEvent> TextBox<E> {
     pub fn get_text(&self) -> &String {
         &self.string
+    }
+
+    fn add_callback<CB: 'static + FnMut(&str)>(&mut self, c: CB) {
+        self.text_changed_callback.push(Box::new(c));
     }
 }
 
@@ -41,6 +45,7 @@ impl<E: AsKeyEvent> View for TextBox<E> {
     }
 
     fn handle_key_event(&mut self, key: KeyCode) {
+        let temp = self.string.clone();
         match key {
             KeyCode::Char(c) => self.string.push(c),
             KeyCode::Backspace => {
@@ -50,6 +55,12 @@ impl<E: AsKeyEvent> View for TextBox<E> {
                 }
             }
             _ => {}
+        }
+        let current_str = self.string.clone();
+        if temp != current_str {
+            self.text_changed_callback
+                .iter_mut()
+                .for_each(|callback| callback(&current_str));
         }
     }
 }
@@ -66,5 +77,6 @@ pub fn make_textbox<E: AsKeyEvent>(
         desire_size,
         focused: true,
         phantom: std::marker::PhantomData,
+        text_changed_callback: vec![],
     }
 }

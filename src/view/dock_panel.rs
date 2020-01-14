@@ -150,4 +150,44 @@ impl View for DockPanel {
     fn render(&mut self, buf: &mut BufferMut) {
         DockPanel::render_child(buf, &mut self.childs)
     }
+
+    //for focusable
+    fn is_focusable(&self) -> bool {
+        self.childs.iter().any(|child| child.1.is_focusable())
+    }
+    fn is_focused(&self) -> bool {
+        self.childs.iter().any(|child| child.1.is_focused())
+    }
+    fn set_focus(&mut self, focus: bool) {
+        if let Some(child) = self
+            .childs
+            .iter_mut()
+            .filter(|child| child.1.is_focused())
+            .next()
+        {
+            child.1.set_focus(focus);
+        }
+    }
+    fn handle_key_event(&mut self, key: KeyCode) {
+        if let Some(child) = self
+            .childs
+            .iter_mut()
+            .filter(|child| child.1.is_focused())
+            .next()
+        {
+            child.1.handle_key_event(key);
+        }
+    }
+    fn get_cursor_pos(&self) -> Option<Point> {
+        if let Some(child) = self
+            .childs
+            .iter()
+            .filter(|child| child.1.is_focused())
+            .next()
+        {
+            child.1.get_cursor_pos()
+        } else {
+            None
+        }
+    }
 }

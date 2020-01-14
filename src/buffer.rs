@@ -137,7 +137,13 @@ impl Buffer {
             let old_cell = old.get_cell(point_with_cell.p);
 
             if let Some(cell) = old_cell {
-                cell != point_with_cell.cell
+                if cell != point_with_cell.cell {
+                    true
+                } else if let Some(cell) = point_with_cell.cell.as_ref() {
+                    cell.cursor_on
+                } else {
+                    false
+                }
             } else {
                 true
             }

@@ -156,9 +156,13 @@ impl<E: AsUIEvent> View for DockPanel<E> {
     }
 
     fn apply_event(&mut self, event: &Self::Event) -> bool {
-        self.childs
-            .iter_mut()
-            .any(|child| child.1.apply_event(event))
+        self.childs.iter_mut().fold(false, |updated, child| {
+            if child.1.apply_event(event) == true {
+                true
+            } else {
+                updated
+            }
+        })
     }
 
     //for focusable

@@ -1,27 +1,27 @@
 use super::utils;
 use super::*;
 
-pub struct TextBox<E: AsUIEvent> {
+pub struct TextBox<'a, E: AsUIEvent> {
     string: String,
     bg: color::Color,
     fg: color::Color,
     desire_size: Size,
     focused: bool,
     phantom: std::marker::PhantomData<E>,
-    text_changed_callback: Vec<Box<dyn FnMut(&str)>>,
+    text_changed_callback: Vec<Box<dyn FnMut(String) + 'a>>,
 }
 
-impl<E: AsUIEvent> TextBox<E> {
+impl<'a, E: AsUIEvent> TextBox<'a, E> {
     pub fn get_text(&self) -> &String {
         &self.string
     }
 
-    pub fn add_callback<CB: 'static + FnMut(&str)>(&mut self, c: CB) {
+    pub fn add_callback<CB: FnMut(String) + 'a>(&mut self, c: CB) {
         self.text_changed_callback.push(Box::new(c));
     }
 }
 
-impl<E: AsUIEvent> View for TextBox<E> {
+impl<'a, E: AsUIEvent> View for TextBox<'a, E> {
     type Event = E;
     fn desire_size(&self) -> Size {
         self.desire_size
@@ -60,16 +60,16 @@ impl<E: AsUIEvent> View for TextBox<E> {
         if temp != current_str {
             self.text_changed_callback
                 .iter_mut()
-                .for_each(|callback| callback(&current_str));
+                .for_each(|callback| callback(current_str.clone()));
         }
     }
 }
 
-pub fn make_textbox<E: AsUIEvent>(
+pub fn make_textbox<'a, E: AsUIEvent>(
     desire_size: Size,
     bg: color::Color,
     fg: color::Color,
-) -> TextBox<E> {
+) -> TextBox<'a, E> {
     TextBox {
         string: String::new(),
         bg,

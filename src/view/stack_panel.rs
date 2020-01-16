@@ -31,6 +31,12 @@ impl<E: AsUIEvent> StackPanel<E> {
         self
     }
 
+    pub fn swap_child(&mut self, index: usize, mut view: Box<dyn View<Event = E>>) {
+        assert!(self.children.len() > index);
+
+        std::mem::swap(&mut self.children[index], &mut view);
+    }
+
     fn render_child(buffer: &mut BufferMut, children: &mut Vec<Box<dyn View<Event = E>>>) {
         let mut offset = Point(0, 0);
         let mut size = buffer.size();

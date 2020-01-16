@@ -53,21 +53,25 @@ pub async fn run<E: AsUIEvent + 'static, V: View<Event = E>>(
     screen.render(terminal_size());
 
     while let Some(event) = event_receiver.next().await {
-        match event.as_ui_event() {
-            Some(Event::Key(key_event)) => {
-                if key_event.code == KeyCode::Char('c')
-                    && key_event.modifiers == KeyModifiers::CONTROL
-                {
-                    break;
-                } else if screen.is_focused() {
-                    screen.handle_key_event(key_event.code);
-                    screen.render(terminal_size());
+        if screen.apply_event(&event) {
+            screen.render(terminal_size());
+        } else {
+            match event.as_ui_event() {
+                Some(Event::Key(key_event)) => {
+                    if key_event.code == KeyCode::Char('c')
+                        && key_event.modifiers == KeyModifiers::CONTROL
+                    {
+                        break;
+                    } else if screen.is_focused() {
+                        screen.handle_key_event(key_event.code);
+                        screen.render(terminal_size());
+                    }
                 }
+                Some(Event::Resize(width, height)) => {
+                    screen.render(size(width, height));
+                }
+                _ => {}
             }
-            Some(Event::Resize(width, height)) => {
-                screen.render(size(width, height));
-            }
-            _ => {}
         }
     }
 }

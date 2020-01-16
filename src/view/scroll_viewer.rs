@@ -10,9 +10,13 @@ pub struct ScrollViewer<V: View, E: AsUIEvent> {
 }
 
 impl<V: View, E: AsUIEvent> ScrollViewer<V, E> {
-    fn set_vertical_offset(&mut self, mut new_offset: u16) -> u16 {
+    pub fn set_vertical_offset(&mut self, mut new_offset: u16) -> u16 {
         std::mem::swap(&mut self.vertical_offset, &mut new_offset);
         new_offset
+    }
+
+    pub fn get_inner_view(&mut self) -> &mut V {
+        &mut self.inner_view
     }
 }
 

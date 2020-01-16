@@ -16,7 +16,7 @@ impl<E: AsUIEvent> TextBox<E> {
         &self.string
     }
 
-    fn add_callback<CB: 'static + FnMut(&str)>(&mut self, c: CB) {
+    pub fn add_callback<CB: 'static + FnMut(&str)>(&mut self, c: CB) {
         self.text_changed_callback.push(Box::new(c));
     }
 }

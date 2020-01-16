@@ -39,6 +39,6 @@ async fn main() {
     }
 
     let (event_sender, event_receiver) = mpsc::channel(1024);
-    tokio::spawn(async move { send_key_event::<BasicEvent>(event_sender).await });
+    tokio::spawn(send_key_event::<BasicEvent>(event_sender));
     run(make_stack_panel(stack_panel), event_receiver).await;
 }

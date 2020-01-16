@@ -1,6 +1,6 @@
 pub use crossterm::event::Event;
 pub use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-use pantin::view::*;
+pub use pantin::view::*;
 use std::io::stdout;
 pub use tokio::stream::StreamExt;
 pub use tokio::sync::mpsc;

@@ -64,6 +64,9 @@ impl<V: View, W: Write> Screen<V, W> {
         self.w.flush().unwrap_or_default();
     }
 
+    pub fn apply_event(&mut self, event: &<V as view::View>::Event) -> bool {
+        self.view.apply_event(event)
+    }
     pub fn desire_size(&self) -> Size {
         self.view.desire_size()
     }

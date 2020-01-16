@@ -15,6 +15,10 @@ impl<V: View, E: AsUIEvent> ScrollViewer<V, E> {
         new_offset
     }
 
+    pub fn get_vertical_offset(&self) -> u16 {
+        self.vertical_offset
+    }
+
     pub fn get_inner_view(&mut self) -> &mut V {
         &mut self.inner_view
     }

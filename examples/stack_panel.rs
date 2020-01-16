@@ -22,7 +22,7 @@ fn get_color() -> color::Color {
     color
 }
 
-fn make_stack_panel(stack_panel: StackPanel) -> StackPanel {
+fn make_stack_panel(stack_panel: StackPanel<BasicEvent>) -> StackPanel<BasicEvent> {
     stack_panel
         .add_child(Box::new(make_fill(get_color(), size(MAX, 5))))
         .add_child(Box::new(make_fill(get_color(), size(MAX, 5))))
@@ -37,5 +37,8 @@ async fn main() {
     for _ in 0..100 {
         stack_panel = make_stack_panel(stack_panel);
     }
-    run(make_stack_panel(stack_panel)).await;
+
+    let (event_sender, event_receiver) = mpsc::channel(1024);
+    tokio::spawn(send_key_event::<BasicEvent>(event_sender));
+    run(make_stack_panel(stack_panel), event_receiver).await;
 }

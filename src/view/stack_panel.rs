@@ -1,18 +1,18 @@
 use super::*;
 
-pub struct StackPanel {
-    children: Vec<Box<dyn View>>,
+pub struct StackPanel<E: AsUIEvent> {
+    children: Vec<Box<dyn View<Event = E>>>,
     bg: Option<color::Color>,
 }
 
-pub fn make_stack_panel() -> StackPanel {
+pub fn make_stack_panel<E: AsUIEvent>() -> StackPanel<E> {
     StackPanel {
         children: vec![],
         bg: None,
     }
 }
 
-impl StackPanel {
+impl<E: AsUIEvent> StackPanel<E> {
     pub fn set_bg(mut self, bg: color::Color) -> Self {
         self.bg = Some(bg);
         self
@@ -22,16 +22,16 @@ impl StackPanel {
         self.children.clear();
     }
 
-    pub fn get_children(&mut self) -> &mut Vec<Box<dyn View>> {
+    pub fn get_children(&mut self) -> &mut Vec<Box<dyn View<Event = E>>> {
         &mut self.children
     }
 
-    pub fn add_child(mut self, view: Box<dyn View>) -> Self {
+    pub fn add_child(mut self, view: Box<dyn View<Event = E>>) -> Self {
         self.children.push(view);
         self
     }
 
-    fn render_child(buffer: &mut BufferMut, children: &mut Vec<Box<dyn View>>) {
+    fn render_child(buffer: &mut BufferMut, children: &mut Vec<Box<dyn View<Event = E>>>) {
         let mut offset = Point(0, 0);
         let mut size = buffer.size();
 
@@ -53,7 +53,8 @@ impl StackPanel {
     }
 }
 
-impl View for StackPanel {
+impl<E: AsUIEvent> View for StackPanel<E> {
+    type Event = E;
     fn desire_size(&self) -> Size {
         let height: u64 = self
             .children

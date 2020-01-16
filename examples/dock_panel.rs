@@ -22,7 +22,7 @@ fn get_color() -> color::Color {
     color
 }
 
-fn make_dock_panel(dock_panel: DockPanel) -> DockPanel {
+fn make_dock_panel(dock_panel: DockPanel<BasicEvent>) -> DockPanel<BasicEvent> {
     dock_panel
         .add_child(Dock::Left, Box::new(make_fill(get_color(), size(1, MAX))))
         .add_child(Dock::Top, Box::new(make_fill(get_color(), size(MAX, 1))))
@@ -30,7 +30,7 @@ fn make_dock_panel(dock_panel: DockPanel) -> DockPanel {
         .add_child(Dock::Bottom, Box::new(make_fill(get_color(), size(MAX, 1))))
 }
 
-fn build_view() -> DockPanel {
+fn build_view() -> DockPanel<BasicEvent> {
     let mut dock_panel = view::make_dock_panel(size(MAX, MAX));
 
     for _ in 0..100 {
@@ -41,5 +41,7 @@ fn build_view() -> DockPanel {
 
 #[tokio::main]
 async fn main() {
-    run(build_view()).await;
+    let (event_sender, event_receiver) = mpsc::channel(1024);
+    tokio::spawn(send_key_event::<BasicEvent>(event_sender));
+    run(build_view(), event_receiver).await;
 }

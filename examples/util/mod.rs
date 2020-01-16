@@ -1,20 +1,49 @@
-use crossterm::event::Event;
-use crossterm::event::KeyCode;
-use pantin::view::*;
+pub use crossterm::event::Event;
+pub use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+pub use pantin::view::*;
 use std::io::stdout;
-use tokio::stream::StreamExt;
-use tokio::sync::mpsc;
+pub use tokio::stream::StreamExt;
+pub use tokio::sync::mpsc;
 
-async fn send_key_event(mut sender: mpsc::Sender<Event>) -> Result<(), error::BoxError> {
+#[derive(Debug, Clone)]
+pub enum BasicEvent {
+    Key(KeyEvent),
+    Resize(Size),
+    Other,
+}
+
+impl AsUIEvent for BasicEvent {
+    fn as_ui_event(&self) -> Option<Event> {
+        match self {
+            BasicEvent::Key(key_event) => Some(Event::Key(*key_event)),
+            BasicEvent::Resize(size) => Some(Event::Resize(size.width, size.height)),
+            _ => None,
+        }
+    }
+    fn from_tui_event(e: Event) -> Self {
+        match e {
+            Event::Key(key_event) => BasicEvent::Key(key_event),
+            Event::Resize(w, h) => BasicEvent::Resize(size(w, h)),
+            _ => BasicEvent::Other,
+        }
+    }
+}
+
+pub async fn send_key_event<E: AsUIEvent + 'static>(
+    mut sender: mpsc::Sender<E>,
+) -> Result<(), error::BoxError> {
     let mut event_stream = crossterm::event::EventStream::new();
     while let Some(Ok(event)) = event_stream.next().await {
-        sender.send(event).await?;
+        sender.send(E::from_tui_event(event)).await?;
     }
 
     Ok(())
 }
 
-pub async fn run<V: View>(view: V) {
+pub async fn run<E: AsUIEvent + 'static, V: View<Event = E>>(
+    view: V,
+    mut event_receiver: mpsc::Receiver<E>,
+) {
     crossterm::terminal::enable_raw_mode().unwrap();
 
     let screen = make_alternate_screen(stdout());
@@ -23,23 +52,26 @@ pub async fn run<V: View>(view: V) {
     let mut screen = make_screen(screen, view, terminal_size());
     screen.render(terminal_size());
 
-    let (event_sender, mut event_receiver) = mpsc::channel(1024);
-    tokio::spawn(async move { send_key_event(event_sender).await });
-
     while let Some(event) = event_receiver.next().await {
-        match event {
-            Event::Key(key_event) => {
-                if key_event.code == KeyCode::Char('q') {
-                    break;
-                } else if screen.is_focused() {
-                    screen.handle_key_event(key_event.code);
-                    screen.render(terminal_size());
+        if screen.apply_event(&event) {
+            screen.render(terminal_size());
+        } else {
+            match event.as_ui_event() {
+                Some(Event::Key(key_event)) => {
+                    if key_event.code == KeyCode::Char('c')
+                        && key_event.modifiers == KeyModifiers::CONTROL
+                    {
+                        break;
+                    } else if screen.is_focused() {
+                        screen.handle_key_event(key_event.code);
+                        screen.render(terminal_size());
+                    }
                 }
+                Some(Event::Resize(width, height)) => {
+                    screen.render(size(width, height));
+                }
+                _ => {}
             }
-            Event::Resize(width, height) => {
-                screen.render(size(width, height));
-            }
-            _ => {}
         }
     }
 }

@@ -19,12 +19,22 @@ pub use stack_panel::*;
 pub use textblock::*;
 pub use textbox::*;
 
-use crossterm::event::KeyCode;
+use crossterm::event::{self, KeyCode};
+
+pub trait AsUIEvent: Clone + std::fmt::Debug + Sync + Send {
+    fn as_ui_event(&self) -> Option<event::Event>;
+    fn from_tui_event(e: crossterm::event::Event) -> Self;
+}
 
 pub trait View {
+    type Event: AsUIEvent;
     fn desire_size(&self) -> Size;
     fn render(&mut self, buf: &mut BufferMut);
 
+    //apply_event, return true when view state is changed
+    fn apply_event(&mut self, _: &Self::Event) -> bool {
+        false
+    }
     //for focusable
     fn is_focusable(&self) -> bool {
         false

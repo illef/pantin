@@ -3,7 +3,7 @@ use pantin::*;
 mod util;
 use util::*;
 
-fn make_view() -> view::DockPanel {
+fn make_view() -> view::DockPanel<BasicEvent> {
     view::make_dock_panel(size(MAX, MAX)).add_child(
         view::Dock::Bottom,
         Box::new(view::make_textbox(
@@ -16,5 +16,7 @@ fn make_view() -> view::DockPanel {
 
 #[tokio::main]
 async fn main() {
-    run(make_view()).await;
+    let (event_sender, event_receiver) = mpsc::channel(1024);
+    tokio::spawn(send_key_event::<BasicEvent>(event_sender));
+    run(make_view(), event_receiver).await;
 }

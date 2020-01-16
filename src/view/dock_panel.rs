@@ -9,13 +9,13 @@ pub enum Dock {
     Full,
 }
 
-pub struct DockPanel {
+pub struct DockPanel<E: AsUIEvent> {
     desire_size: Size,
-    childs: Vec<(Dock, Box<dyn View>)>,
+    childs: Vec<(Dock, Box<dyn View<Event = E>>)>,
     bg: Option<color::Color>,
 }
 
-pub fn make_dock_panel(size: Size) -> DockPanel {
+pub fn make_dock_panel<Event: AsUIEvent>(size: Size) -> DockPanel<Event> {
     DockPanel {
         childs: vec![],
         desire_size: size,
@@ -23,19 +23,19 @@ pub fn make_dock_panel(size: Size) -> DockPanel {
     }
 }
 
-impl DockPanel {
+impl<E: AsUIEvent> DockPanel<E> {
     pub fn set_bg(mut self, bg: color::Color) -> Self {
         self.bg = Some(bg);
         self
     }
-    pub fn add_child(mut self, dock: Dock, view: Box<dyn View>) -> Self {
+    pub fn add_child(mut self, dock: Dock, view: Box<dyn View<Event = E>>) -> Self {
         self.childs.push((dock, view));
         self
     }
 
     fn render_right(
         mut buffer_mut_view: BufferMut,
-        child_view: &mut Box<dyn View>,
+        child_view: &mut Box<dyn View<Event = E>>,
     ) -> (Point, Size) {
         let width = available_size(buffer_mut_view.size(), child_view.desire_size()).width;
 
@@ -55,7 +55,7 @@ impl DockPanel {
 
     fn render_left(
         mut buffer_mut_view: BufferMut,
-        child_view: &mut Box<dyn View>,
+        child_view: &mut Box<dyn View<Event = E>>,
     ) -> (Point, Size) {
         let width = available_size(buffer_mut_view.size(), child_view.desire_size()).width;
 
@@ -75,7 +75,7 @@ impl DockPanel {
 
     fn render_bottom(
         mut buffer_mut_view: BufferMut,
-        child_view: &mut Box<dyn View>,
+        child_view: &mut Box<dyn View<Event = E>>,
     ) -> (Point, Size) {
         let height = available_size(buffer_mut_view.size(), child_view.desire_size()).height;
         let mut child_mut_view = buffer_mut_view.as_mut_view(
@@ -92,7 +92,10 @@ impl DockPanel {
         )
     }
 
-    fn render_top(mut buffer_mut_view: BufferMut, child_view: &mut Box<dyn View>) -> (Point, Size) {
+    fn render_top(
+        mut buffer_mut_view: BufferMut,
+        child_view: &mut Box<dyn View<Event = E>>,
+    ) -> (Point, Size) {
         let height = available_size(buffer_mut_view.size(), child_view.desire_size()).height;
         let mut child_mut_view = buffer_mut_view.as_mut_view(
             Point(0, 0),
@@ -113,13 +116,13 @@ impl DockPanel {
 
     fn render_full(
         mut buffer_mut_view: BufferMut,
-        child_view: &mut Box<dyn View>,
+        child_view: &mut Box<dyn View<Event = E>>,
     ) -> (Point, Size) {
         child_view.render(&mut buffer_mut_view);
         (Point(0, 0), size(0, 0))
     }
 
-    fn render_child(buffer: &mut BufferMut, childs: &mut Vec<(Dock, Box<dyn View>)>) {
+    fn render_child(buffer: &mut BufferMut, childs: &mut Vec<(Dock, Box<dyn View<Event = E>>)>) {
         let mut offset = Point(0, 0);
         let mut size = buffer.size();
 
@@ -143,12 +146,23 @@ impl DockPanel {
     }
 }
 
-impl View for DockPanel {
+impl<E: AsUIEvent> View for DockPanel<E> {
+    type Event = E;
     fn desire_size(&self) -> Size {
         self.desire_size
     }
     fn render(&mut self, buf: &mut BufferMut) {
         DockPanel::render_child(buf, &mut self.childs)
+    }
+
+    fn apply_event(&mut self, event: &Self::Event) -> bool {
+        self.childs.iter_mut().fold(false, |updated, child| {
+            if child.1.apply_event(event) == true {
+                true
+            } else {
+                updated
+            }
+        })
     }
 
     //for focusable

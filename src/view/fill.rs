@@ -2,12 +2,14 @@ use super::utils;
 use super::*;
 
 #[derive(Clone)]
-pub struct Fill {
+pub struct Fill<E: AsUIEvent> {
     bg: color::Color,
     size: Size,
+    phantom: std::marker::PhantomData<E>,
 }
 
-impl View for Fill {
+impl<E: AsUIEvent> View for Fill<E> {
+    type Event = E;
     fn desire_size(&self) -> Size {
         self.size
     }
@@ -17,6 +19,10 @@ impl View for Fill {
     }
 }
 
-pub fn make_fill(bg: color::Color, size: Size) -> Fill {
-    Fill { bg, size }
+pub fn make_fill<E: AsUIEvent>(bg: color::Color, size: Size) -> Fill<E> {
+    Fill {
+        bg,
+        size,
+        phantom: std::marker::PhantomData,
+    }
 }

@@ -11,6 +11,12 @@ pub struct TextBlock<E: AsUIEvent> {
     phantom: std::marker::PhantomData<E>,
 }
 
+impl<E: AsUIEvent> TextBlock<E> {
+    pub fn set_text(&mut self, text: String) {
+        self.string = text;
+    }
+}
+
 impl<E: AsUIEvent> View for TextBlock<E> {
     type Event = E;
     fn desire_size(&self) -> Size {

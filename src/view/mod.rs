@@ -31,6 +31,10 @@ pub trait View {
     fn desire_size(&self) -> Size;
     fn render(&mut self, buf: &mut BufferMut);
 
+    //apply_event, return true when view state is changed
+    fn apply_event(&mut self, _: &Self::Event) -> bool {
+        false
+    }
     //for focusable
     fn is_focusable(&self) -> bool {
         false

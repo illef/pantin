@@ -155,6 +155,12 @@ impl<E: AsUIEvent> View for DockPanel<E> {
         DockPanel::render_child(buf, &mut self.childs)
     }
 
+    fn apply_event(&mut self, event: &Self::Event) -> bool {
+        self.childs
+            .iter_mut()
+            .any(|child| child.1.apply_event(event))
+    }
+
     //for focusable
     fn is_focusable(&self) -> bool {
         self.childs.iter().any(|child| child.1.is_focusable())

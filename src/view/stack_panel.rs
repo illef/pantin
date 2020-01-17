@@ -26,9 +26,15 @@ impl<E: AsUIEvent> StackPanel<E> {
         &mut self.children
     }
 
-    pub fn add_child(mut self, view: Box<dyn View<Event = E>>) -> Self {
+    pub fn add_child(&mut self, view: Box<dyn View<Event = E>>) -> &mut Self {
         self.children.push(view);
         self
+    }
+
+    pub fn swap_child(&mut self, index: usize, mut view: Box<dyn View<Event = E>>) {
+        assert!(self.children.len() > index);
+
+        std::mem::swap(&mut self.children[index], &mut view);
     }
 
     fn render_child(buffer: &mut BufferMut, children: &mut Vec<Box<dyn View<Event = E>>>) {

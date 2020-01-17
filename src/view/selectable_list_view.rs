@@ -9,6 +9,7 @@ pub struct SelectableListView<E: AsUIEvent, S: AsSelectedListViewItem<E>> {
     items: Vec<S>,
     scroll_viewer: ScrollViewer<StackPanel<E>, E>,
     selected_index: usize,
+    is_focused: bool,
     //TODO
     last_selected_item: Option<S>,
 }
@@ -87,12 +88,11 @@ impl<E: AsUIEvent + 'static, S: AsSelectedListViewItem<E>> View for SelectableLi
     }
 
     fn is_focused(&self) -> bool {
-        //TODO
-        true
+        self.is_focused
     }
 
     fn set_focus(&mut self, focus: bool) {
-        //TODO
+        self.is_focused = focus
     }
 
     //TODO::key j, key k is hard coded, change it.
@@ -134,6 +134,7 @@ pub fn make_selectable_list_view<E: AsUIEvent + 'static, S: AsSelectedListViewIt
         scroll_viewer: make_scroll_viewer(make_stack_panel()),
         selected_index: 0,
         last_selected_item: None,
+        is_focused: true,
     };
 
     view.set_items(items);

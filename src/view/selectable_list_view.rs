@@ -28,7 +28,7 @@ fn calc_offset_delta<'a, E: AsUIEvent + 'static>(
             if vertical_offset > 0 {
                 return (vertical_offset * -1) as i16;
             } else if available_height < desire_height {
-                return (desire_height - available_height) as i16;
+                return (desire_height - available_height - vertical_offset) as i16;
             }
         }
 
@@ -218,9 +218,16 @@ mod tests {
 
     #[test]
     fn calc_visible_range_test_4() {
-        let v = make_test_view_items(2, 5);
+        {
+            let v = make_test_view_items(2, 5);
 
-        let result = calc_offset_delta(size(MAX, 6), 0, 1, v.iter());
-        assert_eq!(result, 4);
+            let result = calc_offset_delta(size(MAX, 6), 0, 1, v.iter());
+            assert_eq!(result, 4);
+        }
+        {
+            let v = make_test_view_items(5, 2);
+            let result = calc_offset_delta(size(MAX, 5), 1, 3, v.iter());
+            assert_eq!(result, 2);
+        }
     }
 }

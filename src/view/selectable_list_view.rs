@@ -50,9 +50,21 @@ impl<E: AsUIEvent, S: AsSelectedListViewItem<E>> SelectableListView<E, S> {
 
         self.scroll_viewer.get_inner_view().clear_children();
 
-        //TODO:: use last selected_item
-        if self.selected_index >= self.items.len() {
-            self.selected_index = 0;
+        self.selected_index = 0;
+        if let Some(last_selected_item) = self.last_selected_item.as_ref() {
+            if let Some((i, _)) = self
+                .items
+                .iter()
+                .enumerate()
+                .filter(|item| item.1 == last_selected_item)
+                .next()
+            {
+                self.selected_index = i;
+            }
+        }
+
+        if self.items.len() > self.selected_index {
+            self.last_selected_item = Some(self.items[self.selected_index].clone())
         }
 
         for (i, item) in self.items.iter().enumerate() {
@@ -122,6 +134,8 @@ impl<E: AsUIEvent + 'static, S: AsSelectedListViewItem<E>> View for SelectableLi
             self.scroll_viewer
                 .get_inner_view()
                 .swap_child(self.selected_index, selected_view);
+
+            self.last_selected_item = Some(self.items[last_selected_index].clone());
         }
     }
 }

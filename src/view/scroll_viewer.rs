@@ -4,8 +4,6 @@ pub struct ScrollViewer<V: View, E: AsUIEvent> {
     inner_view: V,
     vertical_offset: u16,
     focused: bool,
-    desire_size: Size,
-    cache_buffer: Option<Buffer>,
     phantom: std::marker::PhantomData<E>,
 }
 
@@ -53,19 +51,13 @@ impl<V: View, E: AsUIEvent> View for ScrollViewer<V, E> {
         }
     }
     fn desire_size(&self) -> Size {
-        self.desire_size
+        self.inner_view.desire_size()
     }
     fn render(&mut self, buf: &mut BufferMut) {
-        if self.cache_buffer.is_none()
-            || self.cache_buffer.as_ref().unwrap().size().width < buf.size().width
+        let mut cache_buffer = Buffer::new(size(buf.size().width, self.desire_size().height));
         {
-            let desize_height = self.desire_size.height;
-            let mut buffer_cache = Buffer::new(size(buf.size().width, desize_height));
-            {
-                let mut buffer_mut = buffer_cache.as_mut_view(Point(0, 0), buffer_cache.size());
-                self.inner_view.render(&mut buffer_mut);
-            }
-            self.cache_buffer = Some(buffer_cache);
+            let mut buffer_mut = cache_buffer.as_mut_view(Point(0, 0), cache_buffer.size());
+            self.inner_view.render(&mut buffer_mut);
         }
         if buf.size().height >= self.desire_size().height {
             self.vertical_offset = 0;
@@ -73,15 +65,10 @@ impl<V: View, E: AsUIEvent> View for ScrollViewer<V, E> {
             self.vertical_offset = self.desire_size().height - buf.size().height;
         }
 
-        assert!(self.cache_buffer.is_some());
-        assert!(self.cache_buffer.as_ref().unwrap().size() >= buf.size());
-        assert!(self.cache_buffer.as_ref().unwrap().size().height == self.desire_size.height);
+        assert!(cache_buffer.size() >= buf.size());
+        assert!(cache_buffer.size().height == self.desire_size().height);
 
-        let buffer_span = self
-            .cache_buffer
-            .as_mut()
-            .unwrap()
-            .as_mut_view(Point(0, self.vertical_offset), buf.size());
+        let buffer_span = cache_buffer.as_mut_view(Point(0, self.vertical_offset), buf.size());
 
         assert_eq!(buffer_span.size(), buf.size());
 
@@ -97,8 +84,6 @@ impl<V: View, E: AsUIEvent> View for ScrollViewer<V, E> {
 
 pub fn make_scroll_viewer<V: View, E: AsUIEvent>(v: V) -> ScrollViewer<V, E> {
     ScrollViewer {
-        cache_buffer: None,
-        desire_size: v.desire_size(),
         inner_view: v,
         vertical_offset: 0,
         focused: true,

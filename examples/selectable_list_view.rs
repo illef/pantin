@@ -21,50 +21,38 @@ fn create_person() -> Vec<Person> {
 
 impl AsSelectedListViewItem<BasicEvent> for Person {
     fn as_not_selected_view(&self) -> Box<dyn View<Event = BasicEvent>> {
-        let mut dock_panel = make_dock_panel::<BasicEvent>(size(MAX, 1));
-        dock_panel = dock_panel
-            .add_child(
-                Dock::Left,
-                Box::new(make_textblock(
-                    self.name.clone(),
-                    size(10, 1),
-                    Color::Black,
-                    Color::White,
-                )),
-            )
-            .add_child(
-                Dock::Left,
-                Box::new(make_textblock(
-                    self.email.clone(),
-                    size(MAX, 1),
-                    Color::Reset,
-                    Color::Reset,
-                )),
-            );
-        Box::new(dock_panel)
+        let mut stack_panel = make_stack_panel::<BasicEvent>();
+        stack_panel
+            .add_child(Box::new(make_textblock(
+                self.name.clone(),
+                size(MAX, 1),
+                Color::Reset,
+                Color::Reset,
+            )))
+            .add_child(Box::new(make_textblock(
+                "    ".to_owned() + &self.email,
+                size(MAX, 1),
+                Color::Reset,
+                Color::Reset,
+            )));
+        Box::new(stack_panel)
     }
     fn as_selected_view(&self) -> Box<dyn View<Event = BasicEvent>> {
-        let mut dock_panel = make_dock_panel::<BasicEvent>(size(MAX, 1));
-        dock_panel = dock_panel
-            .add_child(
-                Dock::Left,
-                Box::new(make_textblock(
-                    self.name.clone(),
-                    size(10, 1),
-                    Color::Cyan,
-                    Color::Black,
-                )),
-            )
-            .add_child(
-                Dock::Left,
-                Box::new(make_textblock(
-                    self.email.clone(),
-                    size(MAX, 1),
-                    Color::Reset,
-                    Color::Reset,
-                )),
-            );
-        Box::new(dock_panel)
+        let mut stack_panel = make_stack_panel::<BasicEvent>();
+        stack_panel
+            .add_child(Box::new(make_textblock(
+                self.name.clone(),
+                size(MAX, 1),
+                Color::DarkGrey,
+                Color::White,
+            )))
+            .add_child(Box::new(make_textblock(
+                "    ".to_owned() + &self.email,
+                size(MAX, 1),
+                Color::DarkGrey,
+                Color::Reset,
+            )));
+        Box::new(stack_panel)
     }
 }
 

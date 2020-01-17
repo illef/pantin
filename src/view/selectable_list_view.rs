@@ -5,13 +5,14 @@ pub trait AsSelectedListViewItem<E: AsUIEvent>: Clone + PartialEq {
     fn as_selected_view(&self) -> Box<dyn View<Event = E>>;
 }
 
-pub struct SelectableListView<E: AsUIEvent, S: AsSelectedListViewItem<E>> {
+pub struct SelectableListView<'a, E: AsUIEvent, S: AsSelectedListViewItem<E>> {
     items: Vec<S>,
     scroll_viewer: ScrollViewer<StackPanel<E>, E>,
     selected_index: usize,
     is_focused: bool,
     //TODO
     last_selected_item: Option<S>,
+    selected_index_changed_callback: Vec<Box<dyn FnMut(usize) + 'a>>,
 }
 
 fn calc_offset_delta<'a, E: AsUIEvent + 'static>(
@@ -44,7 +45,10 @@ fn calc_offset_delta<'a, E: AsUIEvent + 'static>(
     0
 }
 
-impl<E: AsUIEvent, S: AsSelectedListViewItem<E>> SelectableListView<E, S> {
+impl<'a, E: AsUIEvent, S: AsSelectedListViewItem<E>> SelectableListView<'a, E, S> {
+    pub fn add_callback<CB: FnMut(usize) + 'a>(&mut self, c: CB) {
+        self.selected_index_changed_callback.push(Box::new(c));
+    }
     pub fn set_items(&mut self, items: Vec<S>) {
         self.items = items;
 
@@ -76,9 +80,37 @@ impl<E: AsUIEvent, S: AsSelectedListViewItem<E>> SelectableListView<E, S> {
             }
         }
     }
+
+    fn set_selected_index(&mut self, new_index: usize) {
+        assert!(new_index >= 0);
+        assert!(new_index < self.items.len());
+        let last_selected_index = self.selected_index;
+        self.selected_index = new_index;
+
+        if last_selected_index != new_index {
+            let last_selected_view = self.items[last_selected_index].as_not_selected_view();
+            let selected_view = self.items[self.selected_index].as_selected_view();
+
+            self.scroll_viewer
+                .get_inner_view()
+                .swap_child(last_selected_index, last_selected_view);
+
+            self.scroll_viewer
+                .get_inner_view()
+                .swap_child(self.selected_index, selected_view);
+
+            self.last_selected_item = Some(self.items[last_selected_index].clone());
+
+            self.selected_index_changed_callback
+                .iter_mut()
+                .for_each(|callback| callback(new_index));
+        }
+    }
 }
 
-impl<E: AsUIEvent + 'static, S: AsSelectedListViewItem<E>> View for SelectableListView<E, S> {
+impl<'a, E: AsUIEvent + 'static, S: AsSelectedListViewItem<E>> View
+    for SelectableListView<'a, E, S>
+{
     type Event = E;
     fn desire_size(&self) -> Size {
         self.scroll_viewer.desire_size()
@@ -109,46 +141,34 @@ impl<E: AsUIEvent + 'static, S: AsSelectedListViewItem<E>> View for SelectableLi
 
     //TODO::key j, key k is hard coded, change it.
     fn handle_key_event(&mut self, key: KeyCode) {
-        let last_selected_index = self.selected_index;
+        let mut new_index = 0;
         match key {
             KeyCode::Char('j') => {
                 if self.selected_index + 1 < self.items.len() {
-                    self.selected_index += 1;
+                    new_index = self.selected_index + 1;
                 }
             }
             KeyCode::Char('k') => {
                 if self.selected_index > 0 {
-                    self.selected_index -= 1;
+                    new_index = self.selected_index - 1;
                 }
             }
             _ => {}
         }
-        if last_selected_index != self.selected_index {
-            let last_selected_view = self.items[last_selected_index].as_not_selected_view();
-            let selected_view = self.items[self.selected_index].as_selected_view();
-
-            self.scroll_viewer
-                .get_inner_view()
-                .swap_child(last_selected_index, last_selected_view);
-
-            self.scroll_viewer
-                .get_inner_view()
-                .swap_child(self.selected_index, selected_view);
-
-            self.last_selected_item = Some(self.items[last_selected_index].clone());
-        }
+        self.set_selected_index(new_index);
     }
 }
 
-pub fn make_selectable_list_view<E: AsUIEvent + 'static, S: AsSelectedListViewItem<E>>(
+pub fn make_selectable_list_view<'a, E: AsUIEvent + 'static, S: AsSelectedListViewItem<E>>(
     items: Vec<S>,
-) -> SelectableListView<E, S> {
+) -> SelectableListView<'a, E, S> {
     let mut view = SelectableListView {
         items: vec![],
         scroll_viewer: make_scroll_viewer(make_stack_panel()),
         selected_index: 0,
         last_selected_item: None,
         is_focused: true,
+        selected_index_changed_callback: vec![],
     };
 
     view.set_items(items);

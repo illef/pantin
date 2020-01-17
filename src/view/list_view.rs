@@ -27,7 +27,7 @@ pub fn make_list_view<E: AsUIEvent, S: Into<Box<dyn View<Event = E>>>>(
 ) -> ListView<S, E> {
     let mut stack_panel = make_stack_panel();
     for s in iter {
-        stack_panel = stack_panel.add_child(s.into());
+        stack_panel.add_child(s.into());
     }
     ListView {
         stack_panel,

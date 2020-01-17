@@ -26,7 +26,7 @@ impl<E: AsUIEvent> StackPanel<E> {
         &mut self.children
     }
 
-    pub fn add_child(mut self, view: Box<dyn View<Event = E>>) -> Self {
+    pub fn add_child(&mut self, view: Box<dyn View<Event = E>>) -> &mut Self {
         self.children.push(view);
         self
     }

@@ -162,23 +162,21 @@ impl<'a, E: AsUIEvent + 'static, S: AsSelectedListViewItem<E>> View
             return;
         }
         assert!(self.selected_info.is_some());
-        let mut new_index = 0;
         let selected_index = self.selected_info.as_ref().unwrap().0;
 
         match key {
             KeyCode::Char('j') => {
                 if selected_index + 1 < self.items.len() {
-                    new_index = selected_index + 1;
+                    self.set_selected_index(Some(selected_index + 1));
                 }
             }
             KeyCode::Char('k') => {
                 if selected_index > 0 {
-                    new_index = selected_index - 1;
+                    self.set_selected_index(Some(selected_index - 1));
                 }
             }
             _ => {}
         }
-        self.set_selected_index(Some(new_index));
     }
 }
 

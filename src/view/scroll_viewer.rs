@@ -1,3 +1,4 @@
+[38;5;6mShared libraries were designed to address these shortcomings[38;5;0m[m(B
 use super::*;
 
 pub struct ScrollViewer<V: View, E: AsUIEvent> {
@@ -65,7 +66,7 @@ impl<V: View, E: AsUIEvent> View for ScrollViewer<V, E> {
             self.vertical_offset = self.desire_size().height - buf.size().height;
         }
 
-        assert!(cache_buffer.size() >= buf.size());
+        assert!(cache_buffer.size().width == buf.size());
         assert!(cache_buffer.size().height == self.desire_size().height);
 
         let buffer_span = cache_buffer.as_mut_view(Point(0, self.vertical_offset), buf.size());
